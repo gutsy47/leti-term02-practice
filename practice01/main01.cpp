@@ -10,11 +10,30 @@ struct Student {
     unsigned short grades[8]; // 3 exams and 5 differentiated tests
 };
 
+int saveStudent(Student &student) {
+    /*
+     * return 0: No errors
+     * return 2: Error or abortion while saving to DB
+     */
+
+    std::ofstream database("database.txt", std::ios::app);
+    if (!database.is_open()) return 2;
+    database << student.group << ',';
+    database << student.index << ',';
+    database << student.fullName << ',';
+    database << student.isMale;
+    for (auto grade : student.grades) database << ',' << grade;
+    database << std::endl;
+    database.close();
+
+    return 0;
+}
+
 int addStudent() {
     /*
      * return 0: No errors
      * return 1: TypeError in input
-     * return 2: Error or abortion while saving to DB
+     * return 2: File read/write error
      */
 
     Student student{};
@@ -47,17 +66,7 @@ int addStudent() {
     }
 
     // Save to the database.txt
-    std::ofstream database("database.txt", std::ios::app);
-    if (!database.is_open()) return 2;
-    database << student.group << ',';
-    database << student.index << ',';
-    database << student.fullName << ',';
-    database << student.isMale;
-    for (auto grade : student.grades) database << ',' << grade;
-    database << std::endl;
-    database.close();
-
-    return 0;
+    return saveStudent(student);
 }
 
 int main() {
