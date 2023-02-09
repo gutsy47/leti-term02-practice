@@ -7,14 +7,6 @@ const std::string lessonsInGradeBook[] = {
         "Algebra", "Maths", "Dev", "Dev CW", "Physics", "CS", "Philos", "English"
 };
 
-struct Student {
-    unsigned short group{};
-    unsigned short index{};
-    std::string fullName;
-    bool isMale{};
-    unsigned short grades[8]{}; // 3 exams and 5 differentiated tests
-};
-
 short getCursorPositionY() {
     CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo = {};
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &screenBufferInfo);
@@ -32,6 +24,37 @@ void clearAfterCursor(short x = 0, short y = 0) {
             console, ' ', screen.dwSize.X * screen.dwSize.Y, destCoord, &written
     );
     SetConsoleCursorPosition(console, destCoord);
+}
+
+struct Student {
+    unsigned short group{};
+    unsigned short index{};
+    std::string fullName;
+    bool isMale{};
+    unsigned short grades[8]{}; // 3 exams and 5 differentiated tests
+};
+
+Student stringToStudent(std::string data) {
+    Student student;
+
+    student.group = std::stoi(data.substr(0, 4));
+    student.index = std::stoi(data.substr(5, 2));
+
+    data = data.substr(8);
+    student.fullName = "";
+    for (int i = 0; i < data.length(); ++i) {
+        if (data[i] == ',') {
+            data = data.substr(i+1);
+            break;
+        }
+        student.fullName += data[i];
+    }
+
+    student.isMale = std::stoi(data.substr(0, 1));
+
+    for (int i = 0; i < 8; ++i) student.grades[i] = std::stoi(data.substr(2*(i+1), 1));
+
+    return student;
 }
 
 int saveStudent(Student &student, bool isNew = true) {
@@ -87,29 +110,6 @@ int addStudent() {
 
     // Save to the database.txt
     return saveStudent(student);
-}
-
-Student stringToStudent(std::string data) {
-    Student student;
-
-    student.group = std::stoi(data.substr(0, 4));
-    student.index = std::stoi(data.substr(5, 2));
-
-    data = data.substr(8);
-    student.fullName = "";
-    for (int i = 0; i < data.length(); ++i) {
-        if (data[i] == ',') {
-            data = data.substr(i+1);
-            break;
-        }
-        student.fullName += data[i];
-    }
-
-    student.isMale = std::stoi(data.substr(0, 1));
-
-    for (int i = 0; i < 8; ++i) student.grades[i] = std::stoi(data.substr(2*(i+1), 1));
-
-    return student;
 }
 
 int updateStudent(unsigned uuid) {
