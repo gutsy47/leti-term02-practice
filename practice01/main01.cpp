@@ -214,7 +214,7 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
         }
 
         // Clear all after the start and replace cursor to the start line
-        clearAfterCursor(0, startCursorPosY);
+        if (userInput != 0) clearAfterCursor(0, startCursorPosY);
 
     } while (userInput != 0);
 
@@ -223,21 +223,35 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
     return 0;
 }
 
+void printAllStudents(std::vector<Student> &students) {
+    // Header
+    std::cout << "| Group | Index |                      Full Name |    Sex |          Grades |\n";
+    std::cout << '|' << std::setw(77) << std::setfill('-') << "|\n" << std::setfill(' ');
+
+    // Table
+    for (auto &student : students) {
+        std::cout << '|' << std::setw(6) << student.group << ' ';
+        std::cout << '|' << std::setw(6) << student.index << ' ';
+        std::cout << '|' << std::setw(31) << student.fullName << ' ';
+        std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << " |";
+        for (auto grade : student.grades) std::cout << ' ' << grade;
+        std::cout << " |\n";
+    }
+}
+
 int main() {
     setlocale(LC_ALL, "ru");
 
     // Get students from the DB
     std::vector<Student> students;
     getStudents(students);
-    for (auto &student : students) {
-        std::cout << student.group << ' ' << student.index << ' ' << student.fullName << std::endl;
-    }
 
     // Main part of the code (currently temp for functions test)
     int response = addStudent(students);
     std::cout << "addStudent: " << response << std::endl;
     response = updateStudent(students, 237218);
     std::cout << "updStudent: " << response << std::endl;
+    printAllStudents(students);
 
     // Update the DB
     // ...
