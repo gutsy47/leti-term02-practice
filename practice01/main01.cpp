@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <fstream>
 #include <Windows.h>
+#include <vector>
 
 const std::string lessonsInGradeBook[] = {
         "Algebra", "Maths", "Dev", "Dev CW", "Physics", "CS", "Philos", "English"
@@ -40,7 +41,7 @@ Student stringToStudent(std::string data) {
     student.group = std::stoi(data.substr(0, 4));
     student.index = std::stoi(data.substr(5, 2));
 
-    data = data.substr(8);
+    data = data.substr(student.index < 10 ? 7 : 8);
     student.fullName = "";
     for (int i = 0; i < data.length(); ++i) {
         if (data[i] == ',') {
@@ -57,30 +58,33 @@ Student stringToStudent(std::string data) {
     return student;
 }
 
-int saveStudent(Student &student, bool isNew = true) {
-    /*
-     * return 0: No errors
-     * return 2: Error or abortion while saving to DB
-     */
-
-    std::ofstream database("database.txt", std::ios::app);
-    if (!database.is_open()) return 2;
-    database << student.group << ',';
-    database << student.index << ',';
-    database << student.fullName << ',';
-    database << student.isMale;
-    for (auto grade : student.grades) database << ',' << grade;
-    database << std::endl;
-    database.close();
-
-    return 0;
+unsigned getUuid(unsigned short group, unsigned short index) {
+    return group * 100 + index;
 }
 
-int addStudent() {
+bool isUnique(std::vector<Student> &students, unsigned short group, unsigned short index) {
+    // Not a std::any_of because it needs to create uuids vector
+    for (auto &check : students) // NOLINT(readability-use-anyofallof)
+        if (getUuid(check.group, check.index) == getUuid(group, index)) return false;
+    return true;
+}
+
+void getStudents(std::vector<Student> &students) {
+    std::ifstream database("database.txt");
+    if (!database.is_open()) return;
+    std::string line;
+    while (!database.eof()) {
+        std::getline(database, line);
+        if (!line.empty()) students.push_back(stringToStudent(line));
+    }
+}
+
+int addStudent(std::vector<Student> &students) {
     /*
      * return 0: No errors
      * return 1: TypeError in input
      * return 2: File read/write error
+     * return 4: Student already exists
      */
 
     Student student;
@@ -91,6 +95,8 @@ int addStudent() {
 
     std::cout << std::setw(15) << "Index: ";
     if ((std::cin >> student.index).fail() || student.index < 1 || student.index >= 100) return 1;
+
+    if (!isUnique(students, student.group, student.index)) return 4;
 
     std::cout << std::setw(15) << "Full name: ";
     std::getline(std::cin.ignore(), student.fullName);
@@ -108,35 +114,35 @@ int addStudent() {
         }
     }
 
-    // Save to the database.txt
-    return saveStudent(student);
+    // Push back and return
+    students.push_back(student);
+    return 0;
 }
 
-int updateStudent(unsigned uuid) {
+int updateStudent(std::vector<Student> &students, unsigned uuid) {
     /*
      * return 0: No errors
      * return 1: Wrong input
      * return 2: File read/write error
      * return 3: Student not found
+     * return 4: Student already exists
      */
 
     // Input error handler
     if (uuid < 100000 || uuid > 999999) return 1;
 
-    // Get data as string from the DB
-    std::ifstream database("database.txt");
-    if (!database.is_open()) return 2;
-    std::string line;
-    while (!database.eof()) {
-        std::getline(database, line);
-        unsigned check = std::stoi(line.substr(0, 4) + line.substr(5, 2));
-        if (!line.empty() && check == uuid) break;
+    // Get student by UUID
+    bool isFound = false;
+    Student student;
+    unsigned short studentInd;
+    for (int i = 0; i < students.size(); ++i) {
+        if ((getUuid(students[i].group, students[i].index)) == uuid) {
+            isFound = true;
+            student = students[i];
+            studentInd = i;
+        }
     }
-    database.close();
-
-    // Parse student object from line if not empty
-    if (line.empty()) return 3;
-    Student student = stringToStudent(line);
+    if (!isFound) return 3;
 
     // Update value while not interrupted by user
     unsigned short userInput = 0;
@@ -162,11 +168,13 @@ int updateStudent(unsigned uuid) {
             case 1: {
                 std::cout << "Group: ";
                 if ((std::cin >> student.group).fail() || student.group < 1000 || student.group >= 10000) return 1;
+                if (!isUnique(students, student.group, student.index)) return 4;
                 break;
             }
             case 2: {
                 std::cout << "Index: ";
                 if ((std::cin >> student.index).fail() || student.index < 1 || student.index >= 100) return 1;
+                if (!isUnique(students, student.group, student.index)) return 4;
                 break;
             }
             case 3: {
@@ -175,20 +183,20 @@ int updateStudent(unsigned uuid) {
                 break;
             }
             case 4: {
-                std::cout << "Is male (1/0) (is it even possible?): ";
+                std::cout << "Is male (1/0) (ayo dude's from Turkey): ";
                 if ((std::cin >> student.isMale).fail()) return 1;
                 break;
             }
             case 5: {
-                // Clear all after the start and replace cursor to the start line
+                // Clear all after the start and write the grade book data
                 clearAfterCursor(0, startCursorPosY);
-
-                // Get input
                 std::cout << "Student grades data" << std::endl;
                 for (int i = 0; i < 8; ++i) {
                     std::cout << i+1 << '.' << std::setw(8);
                     std::cout << lessonsInGradeBook[i] << ": " << student.grades[i] << std::endl;
                 }
+
+                // Get input
                 unsigned short gradeInd;
                 std::cout << "<< Enter number of value to update (or 0 to exit):\n>> ";
                 if ((std::cin >> gradeInd).fail() || gradeInd > 8) return 1;
@@ -210,17 +218,29 @@ int updateStudent(unsigned uuid) {
 
     } while (userInput != 0);
 
-    // THERE IS NO SAVE TO THE DB
-    // I've decided to work with array of Student{} cuz it's easier and faster
-
+    // Save the update and return
+    students[studentInd] = student;
     return 0;
 }
 
 int main() {
     setlocale(LC_ALL, "ru");
 
-    int response = addStudent();
-    response = updateStudent(237218);
+    // Get students from the DB
+    std::vector<Student> students;
+    getStudents(students);
+    for (auto &student : students) {
+        std::cout << student.group << ' ' << student.index << ' ' << student.fullName << std::endl;
+    }
+
+    // Main part of the code (currently temp for functions test)
+    int response = addStudent(students);
+    std::cout << "addStudent: " << response << std::endl;
+    response = updateStudent(students, 237218);
+    std::cout << "updStudent: " << response << std::endl;
+
+    // Update the DB
+    // ...
 
     return 0;
 }
