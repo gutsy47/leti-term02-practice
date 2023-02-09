@@ -239,6 +239,23 @@ void printAllStudents(std::vector<Student> &students) {
     }
 }
 
+void printStudentsByGroup(std::vector<Student> &students, unsigned short group) {
+    // Header
+    std::cout << "| Index |                      Full Name |    Sex |          Grades |\n";
+    std::cout << '|' << std::setw(69) << std::setfill('-') << "|\n" << std::setfill(' ');
+
+    // Table
+    for (auto &student : students) {
+        if (student.group == group) {
+            std::cout << '|' << std::setw(6) << student.index << ' ';
+            std::cout << '|' << std::setw(31) << student.fullName << ' ';
+            std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << " |";
+            for (auto grade : student.grades) std::cout << ' ' << grade;
+            std::cout << " |\n";
+        }
+    }
+}
+
 int main() {
     setlocale(LC_ALL, "ru");
 
@@ -249,9 +266,17 @@ int main() {
     // Main part of the code (currently temp for functions test)
     int response = addStudent(students);
     std::cout << "addStudent: " << response << std::endl;
+    std::cout << '\n';
+
     response = updateStudent(students, 237218);
     std::cout << "updStudent: " << response << std::endl;
+    std::cout << '\n';
+
     printAllStudents(students);
+    std::cout << '\n';
+
+    printStudentsByGroup(students, 2372);
+    std::cout << '\n';
 
     // Update the DB
     // ...
