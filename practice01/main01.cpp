@@ -3,6 +3,7 @@
 #include <fstream>
 #include <Windows.h>
 #include <vector>
+#include <cmath>
 
 const std::string lessonsInGradeBook[] = {
         "Algebra", "Maths", "Dev", "Dev CW", "Physics", "CS", "Philos", "English"
@@ -33,6 +34,7 @@ struct Student {
     std::string fullName;
     bool isMale{};
     unsigned short grades[8]{}; // 3 exams and 5 differentiated tests
+    float average{};
 };
 
 Student stringToStudent(std::string data) {
@@ -55,11 +57,19 @@ Student stringToStudent(std::string data) {
 
     for (int i = 0; i < 8; ++i) student.grades[i] = std::stoi(data.substr(2*(i+1), 1));
 
+    student.average = std::stof(data.substr(18));
+
     return student;
 }
 
 unsigned getUuid(unsigned short group, unsigned short index) {
     return group * 100 + index;
+}
+
+float getAverage(const unsigned short (&grades)[8]) {
+    float result = 0;
+    for (auto grade : grades) result += float(grade);
+    return std::round((result / 8 * 100)) / 100;
 }
 
 bool isUnique(std::vector<Student> &students, unsigned short group, unsigned short index) {
@@ -114,6 +124,10 @@ int addStudent(std::vector<Student> &students) {
         }
     }
 
+    student.average = getAverage(student.grades);
+    std::cout << std::setw(15) << "|\n";
+    std::cout << std::setw(14) << '|' << std::setw(10) << "Average: " << student.average << std::endl;
+
     // Push back and return
     students.push_back(student);
     return 0;
@@ -159,6 +173,8 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
             std::cout << std::setw(10) << '|' << std::setw(8);
             std::cout << lessonsInGradeBook[i] << ": " << student.grades[i] << std::endl;
         }
+        std::cout << std::setw(11) << "|\n";
+        std::cout << std::setw(10) << '|' << std::setw(10) << "Average: " << student.average << std::endl;
 
         // Update value
         std::cout << "<< Enter number of value to update (or 0 to exit):\n>> ";
@@ -195,6 +211,7 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
                     std::cout << i+1 << '.' << std::setw(8);
                     std::cout << lessonsInGradeBook[i] << ": " << student.grades[i] << std::endl;
                 }
+                std::cout << std::setw(12) << "Average: " << student.average << std::endl;
 
                 // Get input
                 unsigned short gradeInd;
@@ -208,6 +225,7 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
                     std::cout << student.fullName << " will be expelled. Saving to DB aborted";
                     return 2;
                 }
+                student.average = getAverage(student.grades);
                 break;
             }
             default: return 1; // Not an uint or not in range
@@ -225,15 +243,16 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
 
 void printAllStudents(std::vector<Student> &students) {
     // Header
-    std::cout << "| Group | Index |                      Full Name |    Sex |          Grades |\n";
-    std::cout << '|' << std::setw(77) << std::setfill('-') << "|\n" << std::setfill(' ');
+    std::cout << "| Group | Index |                      Full Name |    Sex |  Avg |          Grades |\n";
+    std::cout << '|' << std::setw(84) << std::setfill('-') << "|\n" << std::setfill(' ');
 
     // Table
     for (auto &student : students) {
         std::cout << '|' << std::setw(6) << student.group << ' ';
         std::cout << '|' << std::setw(6) << student.index << ' ';
         std::cout << '|' << std::setw(31) << student.fullName << ' ';
-        std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << " |";
+        std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << ' ';
+        std::cout << '|' << std::setw(5) << getAverage(student.grades) << " |";
         for (auto grade : student.grades) std::cout << ' ' << grade;
         std::cout << " |\n";
     }
@@ -241,15 +260,16 @@ void printAllStudents(std::vector<Student> &students) {
 
 void printStudentsByGroup(std::vector<Student> &students, unsigned short group) {
     // Header
-    std::cout << "| Index |                      Full Name |    Sex |          Grades |\n";
-    std::cout << '|' << std::setw(69) << std::setfill('-') << "|\n" << std::setfill(' ');
+    std::cout << "| Index |                      Full Name |    Sex |  Avg |          Grades |\n";
+    std::cout << '|' << std::setw(76) << std::setfill('-') << "|\n" << std::setfill(' ');
 
     // Table
     for (auto &student : students) {
         if (student.group == group) {
             std::cout << '|' << std::setw(6) << student.index << ' ';
             std::cout << '|' << std::setw(31) << student.fullName << ' ';
-            std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << " |";
+            std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << ' ';
+            std::cout << '|' << std::setw(5) << student.average << " |";
             for (auto grade : student.grades) std::cout << ' ' << grade;
             std::cout << " |\n";
         }
