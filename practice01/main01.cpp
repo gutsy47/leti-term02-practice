@@ -276,6 +276,15 @@ void printStudentsByGroup(std::vector<Student> &students, unsigned short group) 
     }
 }
 
+bool compareGrades(const Student &st1, const Student &st2) {
+    return (st1.average > st2.average);
+}
+
+void printTopStudents(std::vector<Student> &students) {
+    std::sort(students.begin(), students.end(), compareGrades);
+    printAllStudents(students);
+}
+
 int main() {
     setlocale(LC_ALL, "ru");
 
@@ -296,6 +305,11 @@ int main() {
     std::cout << '\n';
 
     printStudentsByGroup(students, 2372);
+    std::cout << '\n';
+
+    // Print students top
+    std::sort(students.begin(), students.end(), compareGrades);
+    printAllStudents(students);
     std::cout << '\n';
 
     // Update the DB
