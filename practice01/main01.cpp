@@ -280,9 +280,14 @@ bool compareGrades(const Student &st1, const Student &st2) {
     return (st1.average > st2.average);
 }
 
-void printTopStudents(std::vector<Student> &students) {
-    std::sort(students.begin(), students.end(), compareGrades);
-    printAllStudents(students);
+void printNumberByGender(std::vector<Student> &students) {
+    unsigned short maleAmount = 0, femaleAmount = 0;
+    for (auto &student : students) {
+        if (student.isMale) maleAmount++;
+        else femaleAmount++;
+    }
+    std::cout << "  Male students: " << maleAmount << std::endl;
+    std::cout << "Female students: " << femaleAmount << std::endl;
 }
 
 int main() {
@@ -310,6 +315,9 @@ int main() {
     // Print students top
     std::sort(students.begin(), students.end(), compareGrades);
     printAllStudents(students);
+    std::cout << '\n';
+
+    printNumberByGender(students);
     std::cout << '\n';
 
     // Update the DB
