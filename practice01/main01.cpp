@@ -246,6 +246,12 @@ void printAllStudents(std::vector<Student> &students) {
     std::cout << "| Group | Index |                      Full Name |    Sex |  Avg |          Grades |\n";
     std::cout << '|' << std::setw(84) << std::setfill('-') << "|\n" << std::setfill(' ');
 
+    // Empty table check
+    if (students.empty()) {
+        std::cout << '|' << std::setw(44) << "No data." << std::setw(40) << "|\n";
+        return;
+    }
+
     // Table
     for (auto &student : students) {
         std::cout << '|' << std::setw(6) << student.group << ' ';
@@ -264,6 +270,7 @@ void printStudentsByGroup(std::vector<Student> &students, unsigned short group) 
     std::cout << '|' << std::setw(76) << std::setfill('-') << "|\n" << std::setfill(' ');
 
     // Table
+    bool isPrinted = false;
     for (auto &student : students) {
         if (student.group == group) {
             std::cout << '|' << std::setw(6) << student.index << ' ';
@@ -272,8 +279,11 @@ void printStudentsByGroup(std::vector<Student> &students, unsigned short group) 
             std::cout << '|' << std::setw(5) << student.average << " |";
             for (auto grade : student.grades) std::cout << ' ' << grade;
             std::cout << " |\n";
+            isPrinted = true;
         }
     }
+    if (!isPrinted) // Empty table
+        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
 }
 
 bool compareGrades(const Student &st1, const Student &st2) {
@@ -288,6 +298,42 @@ void printNumberByGender(std::vector<Student> &students) {
     }
     std::cout << "  Male students: " << maleAmount << std::endl;
     std::cout << "Female students: " << femaleAmount << std::endl;
+}
+
+void printByScholarship(std::vector<Student> &students) {
+    std::vector<Student> noScholarship, lowScholarship, midScholarship, highScholarship;
+
+    // Filter by '3' | '4' | '4-5' | '5'
+    for (auto &student : students) {
+        bool any3 = false, any4 = false, any5 = false;
+        for (auto grade : student.grades) {
+            if (grade == 3) {
+                any3 = true;
+                break; // If '3' in grades then no scholarship
+            }
+            if (grade == 4) any4 = true;
+            else any5 = true;
+        }
+
+        if (any3) {
+            noScholarship.push_back(student); // '3' in grades
+        } else if (any5) {
+            if (any4) midScholarship.push_back(student); // '4' or '5'
+            else highScholarship.push_back(student); // All '5'
+        } else {
+            lowScholarship.push_back(student); // All '4'
+        }
+    }
+
+    // Print data
+    std::cout << "High scholarship:\n";
+    printAllStudents(highScholarship);
+    std::cout << "\nMedium scholarship:\n";
+    printAllStudents(midScholarship);
+    std::cout << "\nDefault scholarship:\n";
+    printAllStudents(lowScholarship);
+    std::cout << "\nNo scholarship:\n";
+    printAllStudents(noScholarship);
 }
 
 int main() {
@@ -309,7 +355,7 @@ int main() {
     printAllStudents(students);
     std::cout << '\n';
 
-    printStudentsByGroup(students, 2372);
+    printStudentsByGroup(students, 2379);
     std::cout << '\n';
 
     // Print students top
@@ -318,6 +364,9 @@ int main() {
     std::cout << '\n';
 
     printNumberByGender(students);
+    std::cout << '\n';
+
+    printByScholarship(students);
     std::cout << '\n';
 
     // Update the DB
