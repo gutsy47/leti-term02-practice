@@ -269,6 +269,12 @@ void printStudentsByGroup(std::vector<Student> &students, unsigned short group) 
     std::cout << "| Index |                      Full Name |    Sex |  Avg |          Grades |\n";
     std::cout << '|' << std::setw(76) << std::setfill('-') << "|\n" << std::setfill(' ');
 
+    // Wrong group -> table empty
+    if (group < 1000 || group >= 10000) {
+        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+        return;
+    }
+
     // Table
     bool isPrinted = false;
     for (auto &student : students) {
@@ -336,6 +342,34 @@ void printByScholarship(std::vector<Student> &students) {
     printAllStudents(noScholarship);
 }
 
+void printStudentsByIndex(std::vector<Student> &students, unsigned short index) {
+    // Header
+    std::cout << "| Group |                      Full Name |    Sex |  Avg |          Grades |\n";
+    std::cout << '|' << std::setw(76) << std::setfill('-') << "|\n" << std::setfill(' ');
+
+    // Wrong group -> table empty
+    if (index < 0 || index >= 100) {
+        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+        return;
+    }
+
+    // Table
+    bool isPrinted = false;
+    for (auto &student : students) {
+        if (student.index == index) {
+            std::cout << '|' << std::setw(6) << student.group << ' ';
+            std::cout << '|' << std::setw(31) << student.fullName << ' ';
+            std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << ' ';
+            std::cout << '|' << std::setw(5) << student.average << " |";
+            for (auto grade : student.grades) std::cout << ' ' << grade;
+            std::cout << " |\n";
+            isPrinted = true;
+        }
+    }
+    if (!isPrinted) // Empty table
+        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+}
+
 int main() {
     setlocale(LC_ALL, "ru");
 
@@ -367,6 +401,9 @@ int main() {
     std::cout << '\n';
 
     printByScholarship(students);
+    std::cout << '\n';
+
+    printStudentsByIndex(students, 2);
     std::cout << '\n';
 
     // Update the DB
