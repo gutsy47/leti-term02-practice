@@ -89,6 +89,20 @@ void getStudents(std::vector<Student> &students) {
     }
 }
 
+int saveStudents(std::vector<Student> &students) {
+    std::ofstream database("database.txt", std::ios::trunc);
+    if (!database.is_open()) return 2;
+    for (const auto &student : students) {
+        database << student.group << ',';
+        database << student.index << ',';
+        database << student.fullName << ',';
+        database << student.isMale;
+        for (auto grade : student.grades) database << ',' << grade;
+        database << std::endl;
+    }
+    database.close();
+}
+
 int addStudent(std::vector<Student> &students) {
     /*
      * return 0: No errors
@@ -504,7 +518,7 @@ int main() {
     }
 
     // Update the DB
-    // ...
+    saveStudents(students);
 
     return 0;
 }
