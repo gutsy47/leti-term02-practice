@@ -376,35 +376,132 @@ int main() {
     // Get students from the DB
     std::vector<Student> students;
     getStudents(students);
+    if (students.empty())
+        std::cout << "Database is empty. You've to add students via '1' command.";
 
-    // Main part of the code (currently temp for functions test)
-    int response = addStudent(students);
-    std::cout << "addStudent: " << response << std::endl;
-    std::cout << '\n';
+    // Main loop;
+    std::cout << "Enter 'h' to get list of commands\n";
+    while (true) {
 
-    response = updateStudent(students, 237218);
-    std::cout << "updStudent: " << response << std::endl;
-    std::cout << '\n';
+        // Get command from the user
+        char userAction;
+        std::cout << "<< Action:\n>> ";
+        std::cin.sync();
+        std::cin >> userAction;
 
-    printAllStudents(students);
-    std::cout << '\n';
+        // Exit
+        if (userAction == '0') break;
 
-    printStudentsByGroup(students, 2379);
-    std::cout << '\n';
+        switch (userAction) {
 
-    // Print students top
-    std::sort(students.begin(), students.end(), compareGrades);
-    printAllStudents(students);
-    std::cout << '\n';
+            // Add new student
+            case '1': {
+                int response = addStudent(students);
+                if (response != 0) {
+                    std::cout << "Student's data wasn't saved. Something went wrong.\n";
+                    if (response == 1) std::cout << "ValueError: Wrong input\n";
+                    else if (response == 2) std::cout << "FileError: Cannot open the \"database.txt\"\n";
+                    else if (response == 4) std::cout << "ExistsError: Student already exists\n";
+                } else {
+                    std::cout << "Student's data has been saved.\n";
+                }
+                break;
+            }
 
-    printNumberByGender(students);
-    std::cout << '\n';
+            // Update student with specified UUID
+            case '2': {
+                unsigned uuid;
+                std::cout << "<< Enter an UUID of the student:\n>> ";
+                std::cin >> uuid;
+                int response = updateStudent(students, uuid);
+                if (response != 0) {
+                    std::cout << "Student's data wasn't updated. Something went wrong.\n";
+                    if (response == 1) std::cout << "ValueError: Wrong input\n";
+                    else if (response == 2) std::cout << "FileError: Cannot open the \"database.txt\"\n";
+                    else if (response == 3) std::cout << "NotFoundError: There's no student with such UUID\n";
+                    else if (response == 4) std::cout << "ExistsError: Student already exists\n";
+                } else {
+                    std::cout << "Student's data has been updated.\n";
+                }
+                break;
+            }
 
-    printByScholarship(students);
-    std::cout << '\n';
+            // Print all students
+            case '3': {
+                printAllStudents(students);
+                break;
+            }
 
-    printStudentsByIndex(students, 2);
-    std::cout << '\n';
+            // Print students filtered by group
+            case '4': {
+                unsigned short group;
+                std::cout << "<< Enter a group:\n>> ";
+                if ((std::cin >> group).fail()) {
+                    std::cout << "ValueError: Wrong input\n";
+                    break;
+                }
+                printStudentsByGroup(students, group);
+                break;
+            }
+
+            // Print students sorted by average grade
+            case '5': {
+                std::sort(students.begin(), students.end(), compareGrades);
+                printAllStudents(students);
+                break;
+            }
+
+            // Print amount of students by each gender
+            case '6': {
+                printNumberByGender(students);
+                break;
+            }
+
+            // Print students grouped by scholarship
+            case '7': {
+                printByScholarship(students);
+                break;
+            }
+
+            // Print students filtered by index
+            case '8': {
+                unsigned short index;
+                std::cout << "<< Enter an index:\n>> ";
+                if ((std::cin >> index).fail()) {
+                    std::cout << "ValueError: Wrong input\n";
+                    break;
+                }
+                printStudentsByIndex(students, index);
+                break;
+            }
+
+            // Help
+            case 'h': {
+                std::cout << "Available commands:\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "h: Help\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "1: Add new student\n";
+                std::cout << "2: Update student by UUID\n";
+                std::cout << "3: Print all students\n";
+                std::cout << "4: Filter students by group number\n";
+                std::cout << "5: Sort students by grade point average\n";
+                std::cout << "6: Count amount of men/women\n";
+                std::cout << "7: Group students by scholarship\n";
+                std::cout << "8: Filter students by index\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "0: Exit\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "NOTE: Script will skip all the useless input (e.g. extra symbols in action input)\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << std::setfill(' ');
+                break;
+            }
+
+            // Unknown command error
+            default: std::cout << "RuntimeError: unknown command\n";
+        }
+    }
 
     // Update the DB
     // ...
