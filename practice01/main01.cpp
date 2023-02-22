@@ -67,9 +67,9 @@ unsigned getUuid(unsigned short group, unsigned short index) {
 }
 
 float getAverage(const unsigned short (&grades)[8]) {
-    float result = 0;
-    for (auto grade : grades) result += float(grade);
-    return std::round((result / 8 * 100)) / 100;
+    float sum = 0;
+    for (auto grade : grades) sum += float(grade);
+    return std::round((sum / 8 * 100)) / 100;
 }
 
 bool isUnique(std::vector<Student> &students, unsigned short group, unsigned short index) {
@@ -96,9 +96,9 @@ int saveStudents(std::vector<Student> &students) {
         database << student.group << ',';
         database << student.index << ',';
         database << student.fullName << ',';
-        database << student.isMale;
-        for (auto grade : student.grades) database << ',' << grade;
-        database << std::endl;
+        database << student.isMale << ',';
+        for (auto grade : student.grades) database << grade << ',';
+        database << student.average << std::endl;
     }
     database.close();
 }
@@ -257,12 +257,12 @@ int updateStudent(std::vector<Student> &students, unsigned uuid) {
 
 void printAllStudents(std::vector<Student> &students) {
     // Header
-    std::cout << "| Group | Index |                      Full Name |    Sex |  Avg |          Grades |\n";
-    std::cout << '|' << std::setw(84) << std::setfill('-') << "|\n" << std::setfill(' ');
+    std::cout << "| Group | Index |                        Full Name |    Sex |  Avg |          Grades |\n";
+    std::cout << '|' << std::setw(86) << std::setfill('-') << "|\n" << std::setfill(' ');
 
     // Empty table check
     if (students.empty()) {
-        std::cout << '|' << std::setw(44) << "No data." << std::setw(40) << "|\n";
+        std::cout << '|' << std::setw(45) << "No data." << std::setw(41) << "|\n";
         return;
     }
 
@@ -270,7 +270,7 @@ void printAllStudents(std::vector<Student> &students) {
     for (auto &student : students) {
         std::cout << '|' << std::setw(6) << student.group << ' ';
         std::cout << '|' << std::setw(6) << student.index << ' ';
-        std::cout << '|' << std::setw(31) << student.fullName << ' ';
+        std::cout << '|' << std::setw(33) << student.fullName << ' ';
         std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << ' ';
         std::cout << '|' << std::setw(5) << getAverage(student.grades) << " |";
         for (auto grade : student.grades) std::cout << ' ' << grade;
@@ -280,12 +280,12 @@ void printAllStudents(std::vector<Student> &students) {
 
 void printStudentsByGroup(std::vector<Student> &students, unsigned short group) {
     // Header
-    std::cout << "| Index |                      Full Name |    Sex |  Avg |          Grades |\n";
-    std::cout << '|' << std::setw(76) << std::setfill('-') << "|\n" << std::setfill(' ');
+    std::cout << "| Index |                        Full Name |    Sex |  Avg |          Grades |\n";
+    std::cout << '|' << std::setw(78) << std::setfill('-') << "|\n" << std::setfill(' ');
 
     // Wrong group -> table empty
     if (group < 1000 || group >= 10000) {
-        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+        std::cout << '|' << std::setw(41) << "No data." << std::setw(37) << "|\n";
         return;
     }
 
@@ -294,7 +294,7 @@ void printStudentsByGroup(std::vector<Student> &students, unsigned short group) 
     for (auto &student : students) {
         if (student.group == group) {
             std::cout << '|' << std::setw(6) << student.index << ' ';
-            std::cout << '|' << std::setw(31) << student.fullName << ' ';
+            std::cout << '|' << std::setw(33) << student.fullName << ' ';
             std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << ' ';
             std::cout << '|' << std::setw(5) << student.average << " |";
             for (auto grade : student.grades) std::cout << ' ' << grade;
@@ -303,7 +303,7 @@ void printStudentsByGroup(std::vector<Student> &students, unsigned short group) 
         }
     }
     if (!isPrinted) // Empty table
-        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+        std::cout << '|' << std::setw(41) << "No data." << std::setw(37) << "|\n";
 }
 
 bool compareGrades(const Student &st1, const Student &st2) {
@@ -358,12 +358,12 @@ void printByScholarship(std::vector<Student> &students) {
 
 void printStudentsByIndex(std::vector<Student> &students, unsigned short index) {
     // Header
-    std::cout << "| Group |                      Full Name |    Sex |  Avg |          Grades |\n";
-    std::cout << '|' << std::setw(76) << std::setfill('-') << "|\n" << std::setfill(' ');
+    std::cout << "| Group |                        Full Name |    Sex |  Avg |          Grades |\n";
+    std::cout << '|' << std::setw(78) << std::setfill('-') << "|\n" << std::setfill(' ');
 
     // Wrong group -> table empty
     if (index < 0 || index >= 100) {
-        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+        std::cout << '|' << std::setw(42) << "No data." << std::setw(36) << "|\n";
         return;
     }
 
@@ -372,7 +372,7 @@ void printStudentsByIndex(std::vector<Student> &students, unsigned short index) 
     for (auto &student : students) {
         if (student.index == index) {
             std::cout << '|' << std::setw(6) << student.group << ' ';
-            std::cout << '|' << std::setw(31) << student.fullName << ' ';
+            std::cout << '|' << std::setw(33) << student.fullName << ' ';
             std::cout << '|' << std::setw(7) << (student.isMale ? "Male" : "Female") << ' ';
             std::cout << '|' << std::setw(5) << student.average << " |";
             for (auto grade : student.grades) std::cout << ' ' << grade;
@@ -381,7 +381,7 @@ void printStudentsByIndex(std::vector<Student> &students, unsigned short index) 
         }
     }
     if (!isPrinted) // Empty table
-        std::cout << '|' << std::setw(40) << "No data." << std::setw(36) << "|\n";
+        std::cout << '|' << std::setw(42) << "No data." << std::setw(36) << "|\n";
 }
 
 int main() {
@@ -391,9 +391,9 @@ int main() {
     std::vector<Student> students;
     getStudents(students);
     if (students.empty())
-        std::cout << "Database is empty. You've to add students via '1' command.";
+        std::cout << "Database is empty. You've to add students via '1' command.\n";
 
-    // Main loop;
+    // Main loop
     std::cout << "Enter 'h' to get list of commands\n";
     while (true) {
 
@@ -416,6 +416,7 @@ int main() {
                     if (response == 1) std::cout << "ValueError: Wrong input\n";
                     else if (response == 2) std::cout << "FileError: Cannot open the \"database.txt\"\n";
                     else if (response == 4) std::cout << "ExistsError: Student already exists\n";
+                    std::cin.clear();
                 } else {
                     std::cout << "Student's data has been saved.\n";
                 }
@@ -515,10 +516,10 @@ int main() {
             // Unknown command error
             default: std::cout << "RuntimeError: unknown command\n";
         }
-    }
 
-    // Update the DB
-    saveStudents(students);
+        // Update the DB
+        saveStudents(students);
+    }
 
     return 0;
 }
