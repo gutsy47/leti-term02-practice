@@ -10,6 +10,37 @@ struct Node{
 };
 
 
+/// Reads the integer input via cin
+bool inputInt(int &variable, bool isUnsigned = false) {
+    std::cin >> variable;
+    if (std::cin.fail() || (isUnsigned && variable < 0)) {
+        std::cout << "Invalid input\n";
+        std::cin.clear();
+        std::cin.ignore();
+        return false;
+    }
+    return true;
+}
+
+
+/// Print the DLL to the console
+void printList(struct Node * head) {
+    for ( ; head; head = head->next) std::cout << head->value << ' ';
+    std::cout << std::endl;
+}
+
+
+/// Free the memory allocated for a DLL
+void deleteList(struct Node * &head) {
+    while (head) {
+        struct Node *temp = head;
+        head = head->next;
+        delete temp;
+    }
+    head = nullptr;
+}
+
+
 /**
  * Creates a DLL of the specified size filled with randint(0, 99) and returns a pointer to the head node
  * @param size - List size
@@ -35,15 +66,21 @@ struct Node * createList(unsigned size) {
 
 /**
  * Creates a DLL from user input and returns a pointer to the head node
- * @return Pointer to the first element of the list
+ * @return Pointer to the first element of the list or nullptr if input is wrong (or list is empty)
  */
 struct Node * createListFromInput() {
     struct Node *head = nullptr;
     struct Node *tail = nullptr;
 
     int input;
-    std::cout << "<< Enter the list elements separated by spaces (Ctrl+D to finish):\n>> ";
-    while (std::cin >> input) {
+    std::cout << "<< Enter the list elements separated by spaces (Enter 0 to finish):\n>> ";
+    while (true) {
+        if (!inputInt(input)) {  // Invalid input handler
+            if (head) deleteList(head);
+            return nullptr;
+        }
+        if (input == 0) return head;  // Return the first element of the DLL if 0 entered
+
         auto *current = new struct Node;
         current->value = input;
 
@@ -57,25 +94,8 @@ struct Node * createListFromInput() {
         }
         tail = current;  // Update tail
     }
-    return head;  // Return the first element of the DLL
 }
 
-
-/// Print the DLL to the console
-void printList(struct Node * head) {
-    for ( ; head; head = head->next) std::cout << head->value << ' ';
-    std::cout << std::endl;
-}
-
-/// Free the memory allocated for a DLL
-void deleteList(struct Node * &head) {
-    while (head) {
-        struct Node *temp = head;
-        head = head->next;
-        delete temp;
-    }
-    head = nullptr;
-}
 
 /// 1. Формирование DLL размерности N, где:
 ///    1.1. Пользователь вводит количество элементов в списке,
@@ -96,9 +116,10 @@ int main() {
 
     struct Node *head = createListFromInput();
 
-    printList(head);
-
-    deleteList(head);
+    if (head) {
+        printList(head);
+        deleteList(head);
+    }
 
     return 0;
 }
