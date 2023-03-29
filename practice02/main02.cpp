@@ -131,6 +131,30 @@ struct Node * getItemByIndex(struct Node * head, unsigned pos) {
 }
 
 
+/** Finds first occurrence of node by it's value in the DLL
+ *
+ */
+ struct Node * getItemByValue(struct Node * head, int value) {
+     if (!head)  {  // Empty list check
+         std::cout << "List is empty\n";
+         return nullptr;
+     }
+
+     // Traverse the list while not found or node exists
+     while (head) {
+         if (head->value == value) break;
+
+         if (!head->next) {
+             std::cout << "Item not found\n";
+             return nullptr;
+         }
+         head = head->next;
+     }
+
+     return head;
+ }
+
+
 /**
  * Inserts node at the specified position in DLL
  * @param head - The first element of the DLL (may be changed)
@@ -155,6 +179,49 @@ bool insertItem(struct Node * &head, unsigned pos, int value) {
 
     return true;
 }
+
+
+/**
+ * Deletes the node with a specified index
+ * @param head - First element of the DLL, could be changed in process
+ * @param pos - Index of deletable node
+ * @return true if deleted and false if element not found
+ */
+bool deleteItem(struct Node * &head, unsigned pos) {
+    if (!head) return false;  // If the list is empty, no deletion is possible
+
+    // Find the node
+    struct Node *found = getItemByIndex(head, pos);
+    if (!found) return false;
+
+    // Delete the node
+    found->prev ? found->prev->next = found->next : head = found->next; // Update prev node or update the head if null
+    found->next ? found->next->prev = found->prev : nullptr;            // Update next node or list deleted if null
+    delete found;
+
+    return true;
+}
+
+/**
+ * Deletes the node with a specified value
+ * @param head - First element of the DLL, could be changed in process
+ * @param value - Value of deletable node
+ * @return true if deleted and false if element not found
+ */
+bool deleteItemByValue(struct Node * &head, int value) {
+    if (!head) return false;  // If the list is empty, no deletion is possible
+
+    // Find the node
+    struct Node *found = getItemByValue(head, value);
+    if (!found) return false;
+
+    // Delete the node
+    found->prev ? found->prev->next = found->next : head = found->next; // Update prev node or update the head if null
+    found->next ? found->next->prev = found->prev : nullptr;            // Update next node or list deleted if null
+    delete found;
+
+    return true;
+ }
 
 
 /// 1. Формирование DLL размерности N, где:
@@ -260,7 +327,6 @@ int main() {
                     // Compare with dynamic array
                     start = std::chrono::steady_clock::now();
                     std::vector<int> compareArr(size);
-                    for (auto item : compareArr) item = 1 + std::rand() % 99;
                     std::cout << "Vector created. Elapsed time: ";
                     printTimeDurationCast(start);
                 } else {
@@ -274,7 +340,7 @@ int main() {
                 break;
             }
 
-            // Get node by index or by value
+            // Insert new node
             case '2': {
                 if (!head) {
                     std::cout << "List is empty\n";
@@ -292,6 +358,40 @@ int main() {
                 break;
             }
 
+            // Delete list node by index or by value
+            case '3': {
+                if (!head) {
+                    std::cout << "List is empty\n";
+                    continue;
+                }
+
+                // Choose a way to search
+                std::cout << "<< Choose the parameter to search:\n";
+                std::cout << "   1. Index\n";
+                std::cout << "   2. Value\n";
+                int input;
+                if (!inputInt(input)) {              // NaN error handler
+                    continue;
+                } else if (input != 2 && input != 1) {  // Input is not [2/1]
+                    std::cout << "Nah, your input should be 2 or 1. Isn't it simple?\n";
+                    continue;
+                }
+
+                // Delete the node
+                if (input == 1) {
+                    int index;
+                    std::cout << "<< Input index:\n>> ";
+                    if (!inputInt(index, true)) continue;
+                    if (deleteItem(head, index)) std::cout << "Item deleted\n";
+                } else {
+                    int value;
+                    std::cout << "<< Input value:\n>> ";
+                    if (!inputInt(value)) continue;
+                    if (deleteItemByValue(head, value)) std::cout << "Item deleted\n";
+                }
+                break;
+            }
+
             // Print the list
             case 'p': {
                 printList(head);
@@ -306,6 +406,7 @@ int main() {
                 std::cout << std::setw(32) << std::setfill('-') << '\n';
                 std::cout << "1: Create the list\n";
                 std::cout << "2: Insert new Node to the specified position\n";
+                std::cout << "3: Delete a node with the specified index or value\n";
                 std::cout << "p: Display the list\n";
                 std::cout << std::setw(32) << std::setfill('-') << '\n';
                 std::cout << "0: Exit\n";
