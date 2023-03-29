@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <iomanip>
+#include <chrono>
+#include <vector>
 
 
 /// Node structure represents a node in a Doubly-Linked List
@@ -48,6 +50,8 @@ void deleteList(struct Node * &head) {
  * @return Pointer to the first element of the list
  */
 struct Node * createList(unsigned size) {
+    if (size == 0) return nullptr;  // No size - no list
+
     struct Node *current;
     struct Node *next = nullptr;
 
@@ -113,6 +117,17 @@ struct Node * createListFromInput() {
 /// то нельзя ничего удалить и об этом нужно сообщить пользователю).
 /// Необходимо сравнить результаты. Для этого пункты 1-4 должны принимать одинаковые значения.
 
+
+/// Gets the start time_point and prints the duration_cast(now-start) in scientific format
+void printTimeDurationCast(auto start) {
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    std::cout << std::scientific << std::setprecision(1);
+    std::cout << elapsed.count() / 1e9 << " s\n";
+    std::cout << std::defaultfloat;
+}
+
+
 int main() {
 
     struct Node *head = nullptr;
@@ -177,10 +192,24 @@ int main() {
                     int size;
                     std::cout << "<< Input list's size:\n>> ";
                     if (!inputInt(size, true)) continue;
+
+                    auto start = std::chrono::steady_clock::now();
                     head = createList(size);
+                    std::cout << "  List created. Elapsed time: ";
+                    printTimeDurationCast(start);
+
+                    // Compare with dynamic array
+                    start = std::chrono::steady_clock::now();
+                    std::vector<int> compareArr(size);
+                    for (auto item : compareArr) item = 1 + std::rand() % 99;
+                    std::cout << "Vector created. Elapsed time: ";
+                    printTimeDurationCast(start);
                 } else {
                     head = createListFromInput();
                 }
+
+                // List is empty (size = 0 or no input in 2nd case)
+                if (!head) std::cout << "Just kidding, right? The list is empty.\n";
 
                 break;
             }
