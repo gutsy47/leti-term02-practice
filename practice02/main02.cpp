@@ -28,6 +28,10 @@ bool inputInt(int &variable, bool isUnsigned = false) {
 
 /// Print the DLL to the console
 void printList(struct Node * head) {
+    if (!head) {
+        std::cout << "List is empty\n";
+        return;
+    }
     for ( ; head; head = head->next) std::cout << head->value << ' ';
     std::cout << std::endl;
 }
@@ -99,6 +103,57 @@ struct Node * createListFromInput() {
         }
         tail = current;  // Update tail
     }
+}
+
+
+/**
+ * Finds node by it's index in the DLL
+ * @param head - The first element of the DLL
+ * @param pos - Node to find index
+ * @return Pointer to the found node
+ */
+struct Node * getItemByIndex(struct Node * head, unsigned pos) {
+    if (!head) {  // Empty list check
+        std::cout << "List is empty\n";
+        return nullptr;
+    }
+
+    // Traverse the list to the index or return index out of range
+    for (unsigned i = 0; i < pos; ++i) {
+        if (!head->next) {
+            std::cout << "Index out of range\n";
+            return nullptr;
+        }
+        head = head->next;
+    }
+
+    return head;
+}
+
+
+/**
+ * Inserts node at the specified position in DLL
+ * @param head - The first element of the DLL (may be changed)
+ * @param pos - Insertion index
+ * @param value - Node value
+ * @return true if insertion done successful else false
+ */
+bool insertItem(struct Node * &head, unsigned pos, int value) {
+    // Find the current node
+    struct Node * found = getItemByIndex(head, pos);
+    if (!found) return false;
+
+    // Insert the new node
+    auto *newNode = new struct Node;
+    newNode->value = value;
+    newNode->prev = found->prev;
+    newNode->next = found;
+    if (newNode->prev) newNode->prev->next = newNode;
+    if (newNode->next) newNode->next->prev = newNode;
+
+    if (pos == 0) head = newNode;  // Update the head if necessary
+
+    return true;
 }
 
 
@@ -195,6 +250,10 @@ int main() {
 
                     auto start = std::chrono::steady_clock::now();
                     head = createList(size);
+                    if (!head) {  // Size == 0, list is empty
+                        std::cout << "Just kidding, right? The list is empty.\n";
+                        continue;
+                    }
                     std::cout << "  List created. Elapsed time: ";
                     printTimeDurationCast(start);
 
@@ -206,10 +265,29 @@ int main() {
                     printTimeDurationCast(start);
                 } else {
                     head = createListFromInput();
+                    if (!head) {  // No input, list is empty
+                        std::cout << "Just kidding, right? The list is empty.\n";
+                        continue;
+                    }
                 }
 
-                // List is empty (size = 0 or no input in 2nd case)
-                if (!head) std::cout << "Just kidding, right? The list is empty.\n";
+                break;
+            }
+
+            // Get node by index or by value
+            case '2': {
+                if (!head) {
+                    std::cout << "List is empty\n";
+                    continue;
+                }
+
+                // Get index & value and insert new node = value into index
+                int index, value;
+                std::cout << "<< Input index:\n>> ";
+                if (!inputInt(index, true)) continue;
+                std::cout << "<< Input value:\n>> ";
+                if (!inputInt(value)) continue;
+                if (!insertItem(head, index, value)) continue;
 
                 break;
             }
@@ -227,6 +305,7 @@ int main() {
                 std::cout << "h: Help\n";
                 std::cout << std::setw(32) << std::setfill('-') << '\n';
                 std::cout << "1: Create the list\n";
+                std::cout << "2: Insert new Node to the specified position\n";
                 std::cout << "p: Display the list\n";
                 std::cout << std::setw(32) << std::setfill('-') << '\n';
                 std::cout << "0: Exit\n";
