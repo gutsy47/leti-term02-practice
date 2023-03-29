@@ -224,20 +224,56 @@ bool deleteItemByValue(struct Node * &head, int value) {
  }
 
 
-/// 1. Формирование DLL размерности N, где:
-///    1.1. Пользователь вводит количество элементов в списке,
-///         который будет автоматически заполняться случайными числами (0 до 99)
-///    1.1. Пользователь вводит в консоль элементы списка,
-///         N определяется автоматически по количеству введенных элементов
-/// 2. Определение скорости создания DLL (п. 1.1.)
-/// 3. Вставка, удаление, обмен, получение элемента DLL
-///    Удаление и получение элемента необходимо реализовать по индексу и по значению
-/// 4. Определение скорости (п. 3)
-///
-/// Должна быть возможность запуска каждого пункта многократно,
-/// если есть возможность (если в списке/массиве нет элементов,
-/// то нельзя ничего удалить и об этом нужно сообщить пользователю).
-/// Необходимо сравнить результаты. Для этого пункты 1-4 должны принимать одинаковые значения.
+/**
+ * Swaps the node1 and node2 elements of doubly-linked list by indexes
+ * @param head - First element of the DLL, is needed cuz it can change in the process
+ * @param i1 - Index of the first element to be swapped
+ * @param i2 - Index of the second element to be swapped
+ * @return true if elements are swapped else false
+ */
+bool swapByIndex(struct Node * &head, unsigned i1, unsigned i2) {
+    // If list is empty, has only one element, or indexes are the same, then no swapping required
+    if (!head || !head->next || i1 == i2) return false;
+    if (i1 > i2) std::swap(i1, i2);  // Index1 should be less than index2
+
+    struct Node *node1, *node2;
+
+    // Traverse the list until the nodes to be swapped are found
+    unsigned index = 0;
+    struct Node *temp = head;
+    while (temp) {
+        if (index == i1) node1 = temp;
+        else if (index == i2) node2 = temp;
+        // If the second index is out of range, then throw an error message and return false
+        if (!temp->next && i2 > index) {
+            std::cout << "List item not found";
+            return false;
+        }
+        temp = temp->next;
+        index += 1;
+    }
+
+    // If node1 is the head node, update the head to node2
+    if (node1 == head) head = node2;
+
+    // Swap the next pointers of the nodes
+    temp = node1->next;
+    node1->next = node2->next;
+    node2->next = temp;
+    // And update the prev pointers of the next node if it exists
+    if (node1->next) node1->next->prev = node1;
+    if (node2->next) node2->next->prev = node2;
+
+    // Swap the prev pointers of the nodes
+    temp = node1->prev;
+    node1->prev = node2->prev;
+    node2->prev = temp;
+    // And update the next pointer of the previous node if it exists
+    if (node1->prev) node1->prev->next = node1;
+    if (node2->prev) node2->prev->next = node2;
+
+    return true;
+}
 
 
 /// Gets the start time_point and prints the duration_cast(now-start) in scientific format
@@ -337,6 +373,9 @@ int main() {
                     }
                 }
 
+                std::cout << "List: ";
+                printList(head);
+
                 break;
             }
 
@@ -355,6 +394,9 @@ int main() {
                 if (!inputInt(value)) continue;
                 if (!insertItem(head, index, value)) continue;
 
+                std::cout << "Item inserted successful. \nList: ";
+                printList(head);
+
                 break;
             }
 
@@ -368,7 +410,7 @@ int main() {
                 // Choose a way to search
                 std::cout << "<< Choose the parameter to search:\n";
                 std::cout << "   1. Index\n";
-                std::cout << "   2. Value\n";
+                std::cout << "   2. Value\n>> ";
                 int input;
                 if (!inputInt(input)) {              // NaN error handler
                     continue;
@@ -382,13 +424,43 @@ int main() {
                     int index;
                     std::cout << "<< Input index:\n>> ";
                     if (!inputInt(index, true)) continue;
-                    if (deleteItem(head, index)) std::cout << "Item deleted\n";
+                    if (deleteItem(head, index)) {
+                        std::cout << "Item deleted.\nList: ";
+                        printList(head);
+                    }
                 } else {
                     int value;
                     std::cout << "<< Input value:\n>> ";
                     if (!inputInt(value)) continue;
-                    if (deleteItemByValue(head, value)) std::cout << "Item deleted\n";
+                    if (deleteItemByValue(head, value)) {
+                        std::cout << "Item deleted.\nList: ";
+                        printList(head);
+                    }
                 }
+
+                break;
+            }
+
+            // Swap nodes
+            case '4': {
+                if (!head) {
+                    std::cout << "List is empty\n";
+                    continue;
+                }
+
+                // Get indexes
+                int index1, index2;
+                std::cout << "<< Input index 1:\n>> ";
+                if (!inputInt(index1, true)) continue;
+                std::cout << "<< Input index 2:\n>> ";
+                if (!inputInt(index2, true)) continue;
+
+                // Swap
+                if (swapByIndex(head, index1, index2)) {
+                    std::cout << "Elements swapped\nList: ";
+                    printList(head);
+                }
+
                 break;
             }
 
@@ -407,6 +479,7 @@ int main() {
                 std::cout << "1: Create the list\n";
                 std::cout << "2: Insert new Node to the specified position\n";
                 std::cout << "3: Delete a node with the specified index or value\n";
+                std::cout << "4: Swap nodes by specified indexes\n";
                 std::cout << "p: Display the list\n";
                 std::cout << std::setw(32) << std::setfill('-') << '\n';
                 std::cout << "0: Exit\n";
