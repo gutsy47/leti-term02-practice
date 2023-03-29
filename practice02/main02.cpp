@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <iomanip>
 
 
 /// Node structure represents a node in a Doubly-Linked List
@@ -53,7 +54,7 @@ struct Node * createList(unsigned size) {
     // Creates DLL starting from the LAST node
     for (int i = 0; i < size; ++i) {
         current = new struct Node;
-        current->value = std::rand() % 100;
+        current->value = 1 + std::rand() % 99;
 
         current->next = next;               // Point the current node's next pointer to the previous one
         if (next) next->prev = current;     // If there is a previous node, point its prev pointer to the current one
@@ -114,11 +115,100 @@ struct Node * createListFromInput() {
 
 int main() {
 
-    struct Node *head = createListFromInput();
+    struct Node *head = nullptr;
 
-    if (head) {
-        printList(head);
-        deleteList(head);
+    // Main loop
+    std::cout << "Enter 'h' to get list of commands\n";
+    while (true) {
+
+        // Get command from user
+        char userAction;
+        std::cout << "<< Action:\n>> ";
+        std::cin >> userAction;
+
+        // Error handler (i.e. more than one symbol input)
+        if (std::cin.fail() || std::cin.get() != '\n') {
+            std::cout << "RuntimeError: unknown command\n";
+            std::cin.clear();
+            std::cin.ignore(100000, '\n');
+            continue;
+        }
+
+        // Exit command
+        if (userAction == '0') {
+            if (head) deleteList(head);
+            break;
+        }
+
+        switch (userAction) {
+
+            // Create or recreate the list
+            case '1': {
+                // List already exists. Ask for recreation
+                if (head) {
+                    std::cout << "<< List already exists. Do you want to recreate it? [1/0]:\n>> ";
+                    int input;
+                    if (!inputInt(input)) {                  // NaN error handler
+                        continue;
+                    } else if (input != 1 && input != 0) {      // Input is not [1/0]
+                        std::cout << "That's illegal... Input just zero or one [1/0] next time\n";
+                        continue;
+                    } else if (input == 0) {                    // Input is 0, goto userAction
+                        std::cout << "Okay.\n";
+                        continue;
+                    }
+                    deleteList(head);                       // Else remove old list and create new
+                }
+
+                // Get the way list will be created
+                std::cout << "<< Choose how the list will be made:\n";
+                std::cout << "   1. Enter size, autofill with random numbers from 1 to 99\n";
+                std::cout << "   2. Enter numbers until you get bored\n>> ";
+                int input;
+                if (!inputInt(input)) {              // NaN error handler
+                    continue;
+                } else if (input != 2 && input != 1) {  // Input is not [2/1]
+                    std::cout << "Nah, your input should be 2 or 1. Isn't it simple?\n";
+                    continue;
+                }
+
+                // Create the list
+                if (input == 1) {
+                    int size;
+                    std::cout << "<< Input list's size:\n>> ";
+                    if (!inputInt(size, true)) continue;
+                    head = createList(size);
+                } else {
+                    head = createListFromInput();
+                }
+
+                break;
+            }
+
+            // Print the list
+            case 'p': {
+                printList(head);
+                break;
+            }
+
+            // Help
+            case 'h': {
+                std::cout << "Available commands:\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "h: Help\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "1: Create the list\n";
+                std::cout << "p: Display the list\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << "0: Exit\n";
+                std::cout << std::setw(32) << std::setfill('-') << '\n';
+                std::cout << std::setfill(' ');
+                break;
+            }
+
+            // Unknown command error
+            default: std::cout << "RuntimeError: unknown command\n";
+        }
     }
 
     return 0;
