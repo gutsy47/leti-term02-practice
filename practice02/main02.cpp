@@ -277,11 +277,12 @@ bool swapByIndex(struct Node * &head, unsigned i1, unsigned i2) {
 
 
 /// Gets the start time_point and prints the duration_cast(now-start) in scientific format
-void printTimeDurationCast(auto start) {
+void printTimeDurationCast(auto start, bool isEndOfLine = true) {
     auto end = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     std::cout << std::scientific << std::setprecision(1);
-    std::cout << elapsed.count() / 1e9 << " s\n";
+    std::cout << elapsed.count() / 1e9 << " s";
+    if (isEndOfLine) std::cout << std::endl;
     std::cout << std::defaultfloat;
 }
 
@@ -490,6 +491,41 @@ int main() {
                 break;
             }
 
+            // Individual task
+            case 'i': {
+                // Поменяйте k случайных узлов исходного двусвязного списка и k значений
+                // исходного динамического массива. Сравните скорость работы.
+                // k - введенное пользователем число (k должно быть меньше N)
+
+                // Get amount of swaps
+                int swapCount;
+                std::cout << "<< Swap amount:\n>> ";
+                if (!inputInt(swapCount, true)) continue;
+
+                int size = vector.size();
+                for (int i = 1; i <= swapCount; ++i) {
+                    int index1, index2;
+                    do {
+                        index1 = std::rand() % size;
+                        index2 = std::rand() % size;
+                    } while (index1 == index2);
+
+                    std::cout << i << '.';
+
+                    auto start = std::chrono::steady_clock::now();
+                    swapByIndex(head, index1, index2);
+                    std::cout << "  List: ";
+                    printTimeDurationCast(start, false);
+
+                    start = std::chrono::steady_clock::now();
+                    std::swap(vector[index1], vector[index2]);
+                    std::cout << " | Vector: ";
+                    printTimeDurationCast(start);
+                }
+
+                break;
+            }
+
             // Print the list
             case 'p': {
                 printList(head);
@@ -506,6 +542,7 @@ int main() {
                 std::cout << "2: Insert new Node to the specified position\n";
                 std::cout << "3: Delete a node with the specified index or value\n";
                 std::cout << "4: Swap nodes by specified indexes\n";
+                std::cout << "i: Individual task #16\n";
                 std::cout << "p: Display the list\n";
                 std::cout << std::setw(32) << std::setfill('-') << '\n';
                 std::cout << "0: Exit\n";
