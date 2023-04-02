@@ -246,7 +246,7 @@ bool swapByIndex(struct Node * &head, unsigned i1, unsigned i2) {
         else if (index == i2) node2 = temp;
         // If the second index is out of range, then throw an error message and return false
         if (!temp->next && i2 > index) {
-            std::cout << "List item not found";
+            std::cout << "List item not found\n";
             return false;
         }
         temp = temp->next;
@@ -288,7 +288,8 @@ void printTimeDurationCast(auto start) {
 
 int main() {
 
-    struct Node *head = nullptr;
+    struct Node *head = nullptr;  // Doubly-linked list's head
+    std::vector<int> vector;      // Vector for time comparison
 
     // Main loop
     std::cout << "Enter 'h' to get list of commands\n";
@@ -365,6 +366,11 @@ int main() {
                     std::vector<int> compareArr(size);
                     std::cout << "Vector created. Elapsed time: ";
                     printTimeDurationCast(start);
+
+                    vector.clear();
+                    for (auto *curr = head; curr; curr = curr->next) {
+                        vector.push_back(curr->value);
+                    }
                 } else {
                     head = createListFromInput();
                     if (!head) {  // No input, list is empty
@@ -372,9 +378,6 @@ int main() {
                         continue;
                     }
                 }
-
-                std::cout << "List: ";
-                printList(head);
 
                 break;
             }
@@ -392,10 +395,16 @@ int main() {
                 if (!inputInt(index, true)) continue;
                 std::cout << "<< Input value:\n>> ";
                 if (!inputInt(value)) continue;
-                if (!insertItem(head, index, value)) continue;
 
-                std::cout << "Item inserted successful. \nList: ";
-                printList(head);
+                auto start = std::chrono::steady_clock::now();
+                if (!insertItem(head, index, value)) continue;
+                std::cout << "  List insertion successful. Elapsed time: ";
+                printTimeDurationCast(start);
+
+                start = std::chrono::steady_clock::now();
+                vector.insert(vector.begin() + index, value);
+                std::cout << "Vector insertion successful. Elapsed time: ";
+                printTimeDurationCast(start);
 
                 break;
             }
@@ -424,17 +433,29 @@ int main() {
                     int index;
                     std::cout << "<< Input index:\n>> ";
                     if (!inputInt(index, true)) continue;
+                    auto start = std::chrono::steady_clock::now();
                     if (deleteItem(head, index)) {
-                        std::cout << "Item deleted.\nList: ";
-                        printList(head);
+                        std::cout << "  List item deleted. Elapsed time: ";
+                        printTimeDurationCast(start);
+
+                        start = std::chrono::steady_clock::now();
+                        vector.erase(vector.begin() + index);
+                        std::cout << "Vector item deleted. Elapsed time: ";
+                        printTimeDurationCast(start);
                     }
                 } else {
                     int value;
                     std::cout << "<< Input value:\n>> ";
                     if (!inputInt(value)) continue;
+                    auto start = std::chrono::steady_clock::now();
                     if (deleteItemByValue(head, value)) {
-                        std::cout << "Item deleted.\nList: ";
-                        printList(head);
+                        std::cout << "  List item deleted. Elapsed time: ";
+                        printTimeDurationCast(start);
+
+                        start = std::chrono::steady_clock::now();
+                        vector.erase(std::remove(vector.begin(), vector.end(), value), vector.end());
+                        std::cout << "Vector item deleted. Elapsed time: ";
+                        printTimeDurationCast(start);
                     }
                 }
 
@@ -456,9 +477,14 @@ int main() {
                 if (!inputInt(index2, true)) continue;
 
                 // Swap
+                auto start = std::chrono::steady_clock::now();
                 if (swapByIndex(head, index1, index2)) {
-                    std::cout << "Elements swapped\nList: ";
-                    printList(head);
+                    std::cout << "  List items swapped. Elapsed time: ";
+                    printTimeDurationCast(start);
+                    start = std::chrono::steady_clock::now();
+                    std::swap(vector[index1], vector[index2]);
+                    std::cout << "Vector items swapped. Elapsed time: ";
+                    printTimeDurationCast(start);
                 }
 
                 break;
