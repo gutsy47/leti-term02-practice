@@ -366,17 +366,17 @@ int main() {
                     std::vector<int> compareArr(size);
                     std::cout << "Vector created. Elapsed time: ";
                     printTimeDurationCast(start);
-
-                    vector.clear();
-                    for (auto *curr = head; curr; curr = curr->next) {
-                        vector.push_back(curr->value);
-                    }
                 } else {
                     head = createListFromInput();
                     if (!head) {  // No input, list is empty
                         std::cout << "Just kidding, right? The list is empty.\n";
                         continue;
                     }
+                }
+
+                vector.clear();
+                for (auto *curr = head; curr; curr = curr->next) {
+                    vector.push_back(curr->value);
                 }
 
                 break;
