@@ -16,10 +16,10 @@ struct Node{
 /// Reads the integer input via cin
 bool inputInt(int &variable, bool isUnsigned = false) {
     std::cin >> variable;
-    if (std::cin.fail() || (isUnsigned && variable < 0)) {
+    if (std::cin.fail() || (isUnsigned && variable < 0) || std::cin.peek() != '\n') {
         std::cout << "Invalid input\n";
         std::cin.clear();
-        std::cin.ignore();
+        std::cin.ignore(10000, '\n');
         return false;
     }
     return true;
@@ -134,25 +134,25 @@ struct Node * getItemByIndex(struct Node * head, unsigned pos) {
 /** Finds first occurrence of node by it's value in the DLL
  *
  */
- struct Node * getItemByValue(struct Node * head, int value) {
-     if (!head)  {  // Empty list check
-         std::cout << "List is empty\n";
-         return nullptr;
-     }
+struct Node * getItemByValue(struct Node * head, int value) {
+    if (!head)  {  // Empty list check
+        std::cout << "List is empty\n";
+        return nullptr;
+    }
 
-     // Traverse the list while not found or node exists
-     while (head) {
-         if (head->value == value) break;
+    // Traverse the list while not found or node exists
+    while (head) {
+        if (head->value == value) break;
 
-         if (!head->next) {
-             std::cout << "Item not found\n";
-             return nullptr;
-         }
-         head = head->next;
-     }
+        if (!head->next) {
+            std::cout << "Item not found\n";
+            return nullptr;
+        }
+        head = head->next;
+    }
 
-     return head;
- }
+    return head;
+}
 
 
 /**
@@ -495,7 +495,7 @@ int main() {
             case 'i': {
                 // Поменяйте k случайных узлов исходного двусвязного списка и k значений
                 // исходного динамического массива. Сравните скорость работы.
-                // k - введенное пользователем число (k должно быть меньше N)
+                // K - введенное пользователем число (k должно быть меньше N)
 
                 // Get amount of swaps
                 int swapCount;
