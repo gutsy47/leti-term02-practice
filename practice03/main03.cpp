@@ -4,7 +4,14 @@
 #include "stack.h"
 
 bool inputAction(char &userAction) {
-    std::cout << "<< Action:\n>> ";
+    std::cout << "<< Choose form of the expression (or command):\n"
+                 "   1. Infix (common) notation\n"
+                 "   2. Reverse Polish Notation\n"
+                 "   3. Normal Polish Notation\n   "
+              << std::setw(28) << std::setfill('-') << '\n' <<
+              "   i. Toggle debug mode\n"
+              "   0. Exit\n"
+              ">> ";
     std::cin >> userAction;
 
     // Error handler (i.e. more than one symbol input)
@@ -56,57 +63,36 @@ std::string toRPN(const std::string& expr) {
 }
 
 
-
 int main() {
-
-    // Main loop
-    std::cout << "Enter 'h' to get list of commands\n";
+    bool isDebugMode = false;
     while (true) {
-
-        // Get command from user
-        char userAction;
-        if (!inputAction(userAction)) continue; // Error occurred
-        if (userAction == '0') break;              // Exit command
+        char userAction;                             // Get command from user
+        if (!inputAction(userAction)) continue;  // Error occurred
+        if (userAction == '0') break;               // Exit command
 
         switch (userAction) {
-
-            // Do smh
-            case '1': {
-                std::cout << "<< Expression:\n>> ";
-                std::string expr;
-                std::getline(std::cin, expr);
-
-                std::string result = toRPN(expr);
-
-                if (result.empty()) std::cout << "Invalid input";
-                else {
-                    std::cout << "RPN: ";
-                    for (auto c : result) std::cout << c << ' ';
-                }
-                std::cout << std::endl;
-
+            // Infix -> RPN+NPN -> Answer
+            case '1':
                 break;
-            }
 
-            // Help
-            case 'h':
-                std::cout << "Available commands:\n";
-                std::cout << std::setw(32) << std::setfill('-') << '\n';
-                std::cout << "h: Help\n";
-                std::cout << std::setw(32) << std::setfill('-') << '\n';
-                std::cout << "1: \n";
-                std::cout << "2: \n";
-                std::cout << "3: \n";
-                std::cout << "i: Individual task #\n";
-                std::cout << std::setw(32) << std::setfill('-') << '\n';
-                std::cout << "0: Exit\n";
-                std::cout << std::setw(32) << std::setfill('-') << '\n';
-                std::cout << std::setfill(' ');
+            // RPN -> Answer
+            case '2':
+                break;
+
+            // NPN -> Answer
+            case '3':
+                break;
+
+            // Toggle debug mode
+            case 'i':
+                isDebugMode = !isDebugMode;
+                std::cout << "Debug mode switched to " << isDebugMode << '\n';
                 break;
 
             // Unknown command error
             default: std::cout << "RuntimeError: unknown command\n";
         }
+        system("pause");
     }
 
     return 0;
