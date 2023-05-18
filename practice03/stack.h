@@ -7,6 +7,7 @@
 class Stack {
 private:
     std::forward_list<std::string> items;
+    int size;
 public:
     bool isEmpty();
 
@@ -17,6 +18,8 @@ public:
     std::string &top();
 
     void print();
+
+    int getSize();
 };
 
 #endif //INC_02_STACK_H
