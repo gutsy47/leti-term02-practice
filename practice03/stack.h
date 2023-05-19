@@ -7,7 +7,7 @@
 class Stack {
 private:
     std::forward_list<std::string> items;
-    int size;
+    int size = 0;
 public:
     bool isEmpty();
 

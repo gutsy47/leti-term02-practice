@@ -26,24 +26,29 @@ bool inputAction(char &userAction) {
     return true;
 }
 
-std::vector<std::string> splitString(std::string str) {
+std::vector<std::string> splitString(std::string str, bool wsRemove = true) {
     std::vector<std::string> tokens;
     char operators[6] = {'(', ')', '+', '-', '*', '/'};
 
-    str.erase(remove(str.begin(), str.end(), ' '), str.end());
+    if (wsRemove) str.erase(remove(str.begin(), str.end(), ' '), str.end());
     std::string number;
     for (char c : str) {
         std::string s(1, c);
         auto find = std::find(std::begin(operators), std::end(operators), c);
-        if (find != std::end(operators)) {   // Operator
+        if (c == ' ') {
+            if (!number.empty()) {
+                tokens.push_back(number);
+                number.clear();
+            }
+        } else if ( find != std::end(operators)) { // Operator
             if (!number.empty()) {
                 tokens.push_back(number);
                 number.clear();
             }
             tokens.push_back(s);
-        } else if (isdigit(c)) {             // Number
+        } else if (isdigit(c)) {                 // Number
             number += c;
-        } else {                                // Unknown symbol error
+        } else {                                 // Unknown symbol error
             throw "Unknown symbol in expression";
         }
     }
@@ -140,40 +145,27 @@ std::vector<std::string> toNPN(const std::string& expr, bool isDebugMode = false
     return result;
 }
 
-double evaluateRPN(std::vector<std::string>& expr) {
+double evaluate(std::vector<std::string> expr, bool isNPN = false, bool isDebugMode = false) {
     Stack opStack;
+    if (isNPN) std::reverse(expr.begin(), expr.end());
     for (std::string token : expr) {
         if (isdigit(token[0])) {
             opStack.push(token);
+            if (isDebugMode) {
+                std::cout << "Number found. \tStack: ";
+                opStack.print();
+            }
         } else {
             if (opStack.getSize() < 2) throw "Nothing to calculate";
-            double calc = calculate(
-                    std::stod(opStack.pop()),
-                    std::stod(opStack.pop()),
-                    token
-            );
+            double op1 = std::stod(opStack.pop()), op2 = std::stod(opStack.pop());
+            double calc = calculate(op1, op2, token);
             opStack.push(std::to_string(calc));
+            if (isDebugMode) {
+                std::cout << "Evaluate " << op1 << token << op2 << ". \tStack: ";
+                opStack.print();
+            }
         }
     }
-    return std::stod(opStack.pop());
-}
-
-double evaluateNPN(std::vector<std::string>& expr) {
-    Stack opStack;
-    std::reverse(expr.begin(), expr.end());
-    for (auto token : expr) {
-        if (isdigit(token[0])) {
-            opStack.push(token);
-        } else {
-            double calc = calculate(
-                    std::stod(opStack.pop()),
-                    std::stod(opStack.pop()),
-                    token
-            );
-            opStack.push(std::to_string(calc));
-        }
-    }
-
     return std::stod(opStack.pop());
 }
 
@@ -184,6 +176,7 @@ int main() {
         if (!inputAction(userAction)) continue;  // Error occurred
         if (userAction == '0') break;               // Exit command
 
+        bool isNPN = true;
         switch (userAction) {
             // Infix to Polish Notation
             case '1': {
@@ -197,8 +190,8 @@ int main() {
                     std::vector<std::string> rpn = toRPN(expr, isDebugMode);
                     if (isDebugMode) std::cout << "Translating to NPN...\n";
                     std::vector<std::string> npn = toNPN(expr, isDebugMode);
-                    double rpnAnswer = evaluateRPN(rpn);
-                    double npnAnswer = evaluateNPN(npn);
+                    double rpnAnswer = evaluate(rpn, false);
+                    double npnAnswer = evaluate(npn, true);
 
                     std::cout << std::setw(64) << std::setfill('-') << ' ' << std::setfill(' ') << "\n   RPN: ";
                     for (auto token : rpn) std::cout << token << ' ';
@@ -214,13 +207,25 @@ int main() {
                 break;
             }
 
-            // Calculate Reverse Polish Notation
-            case '2':
-                break;
+            // Case algorithms are the same. The only difference is the only one value isRPN
+            case '2': isNPN = false;    // Calculate Reverse Polish Notation
+            case '3': {                 // Calculate Normal Polish Notation
 
-            // Calculate Normal Polish Notation
-            case '3':
+                std::cout << "<< Expression\n>> ";
+                std::string expr;
+                std::getline(std::cin, expr);
+
+                try {
+                    std::vector<std::string> npn = splitString(expr, false);
+                    double answer = evaluate(npn, isNPN, isDebugMode);
+                    std::cout << "Answer: " << answer << std::endl;
+                }
+                catch (const char* error){
+                    std::cerr << error << '\n';
+                }
+
                 break;
+            }
 
             // Toggle debug mode
             case 'i':
