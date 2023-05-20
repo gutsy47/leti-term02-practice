@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
 #include "stack.h"
 
 bool inputAction(char &userAction) {
@@ -27,6 +28,8 @@ bool inputAction(char &userAction) {
 }
 
 std::vector<std::string> splitString(std::string str, bool wsRemove = true) {
+    if (str.empty()) throw std::invalid_argument("Empty string");
+
     std::vector<std::string> tokens;
     char operators[6] = {'(', ')', '+', '-', '*', '/'};
 
@@ -49,7 +52,7 @@ std::vector<std::string> splitString(std::string str, bool wsRemove = true) {
         } else if (isdigit(c)) {                 // Number
             number += c;
         } else {                                 // Unknown symbol error
-            throw "Unknown symbol in expression";
+            throw std::runtime_error("Unknown symbol: " + s);
         }
     }
     if (!number.empty()) tokens.push_back(number);
@@ -73,8 +76,12 @@ double calculate(double a, double b, std::string op) {
         case '+': return a + b;
         case '-': return a - b;
         case '*': return a * b;
-        case '/': return a / b;
-        default: throw "Wrong operator";
+        case '/': {
+            if (b == 0)
+                throw std::runtime_error("Division by zero: " + std::to_string(a) + " / " + std::to_string(b));
+            return a / b;
+        }
+        default: throw std::invalid_argument("Wrong operator: " + op);
     }
 }
 
@@ -85,24 +92,23 @@ std::vector<std::string> toRPN(const std::string& expr, bool isDebugMode = false
     std::vector<std::string> tokens = splitString(expr);
     std::unordered_map<std::string, int> precedences {{"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}};
 
-    int size = 0;
-    for (auto op : tokens) size += op.length() + 1;
+    if (isDebugMode) std::cout << "Translating to NPN...\n";
     for (std::string token : tokens) {
         if (isdigit(token[0])) result.push_back(token);             // Number: Add to result immediately
         else if (token == "(") opStack.push(token);              // Open brace: Add to opStack
         else if (token == ")") {                                      // Close brace: Read stack while not (
             while (opStack.top() != "(") result.push_back(opStack.pop());
-            if (opStack.isEmpty()) throw "Brace error"; // No open brace found
+            if (opStack.isEmpty()) throw std::runtime_error("Unclosed brace");
             opStack.pop(); // Delete open brace from stack
         } else if (precedences.count(token) > 0) {                 // Operator
             while (!opStack.isEmpty() && opStack.top() != "(" && precedences[token] <= precedences[opStack.top()])
                 result.push_back(opStack.pop());
             opStack.push(token);
-        } else throw "Invalid syntax";
+        } else throw std::runtime_error("Invalid syntax: " + token);
         if (isDebugMode) printDebug(result, opStack, tokens);
     }
     while (!opStack.isEmpty()) {
-        if (opStack.top() == "(") throw "Unclosed brace";
+        if (opStack.top() == "(") throw std::runtime_error("Unclosed brace");
         result.push_back(opStack.pop());
         if (isDebugMode) printDebug(result, opStack, tokens);
     }
@@ -117,6 +123,7 @@ std::vector<std::string> toNPN(const std::string& expr, bool isDebugMode = false
     std::vector<std::string> tokens = splitString(expr);
     std::reverse(tokens.begin(), tokens.end());
 
+    if (isDebugMode) std::cout << "Translating to NPN...\n";
     for (std::string token : tokens) {
         if (std::isdigit(token[0])) {              // Number
             result.push_back(token);
@@ -129,13 +136,13 @@ std::vector<std::string> toNPN(const std::string& expr, bool isDebugMode = false
         } else if (token == "(") {                    // Close brace
             while (!opStack.isEmpty() && opStack.top() != ")")
                 result.push_back(opStack.pop());
-            if (opStack.isEmpty()) throw "Unclosed brace";
+            if (opStack.isEmpty()) throw std::runtime_error("Unclosed brace");
             opStack.pop();
-        } else throw "Invalid syntax";                 // Error
+        } else throw std::runtime_error("Invalid syntax: " + token);                 // Error
         if (isDebugMode) printDebug(result, opStack, tokens);
     }
     while (!opStack.isEmpty()) {
-        if (opStack.top() == ")") throw "Unclosed brace";
+        if (opStack.top() == ")") throw std::runtime_error("Unclosed brace");
         result.push_back(opStack.pop());
         if (isDebugMode) printDebug(result, opStack, tokens);
     }
@@ -146,6 +153,8 @@ std::vector<std::string> toNPN(const std::string& expr, bool isDebugMode = false
 }
 
 double evaluate(std::vector<std::string> expr, bool isNPN = false, bool isDebugMode = false) {
+    if (isDebugMode) std::cout << "Calculating " << (isNPN ? "NPN" : "RPN") << "...\n";
+
     Stack opStack;
     if (isNPN) std::reverse(expr.begin(), expr.end());
     for (std::string token : expr) {
@@ -156,8 +165,9 @@ double evaluate(std::vector<std::string> expr, bool isNPN = false, bool isDebugM
                 opStack.print();
             }
         } else {
-            if (opStack.getSize() < 2) throw "Nothing to calculate";
+            if (opStack.getSize() < 2) throw std::runtime_error("Nothing to calculate");
             double op1 = std::stod(opStack.pop()), op2 = std::stod(opStack.pop());
+            if (!isNPN) std::swap(op1, op2);
             double calc = calculate(op1, op2, token);
             opStack.push(std::to_string(calc));
             if (isDebugMode) {
@@ -180,30 +190,26 @@ int main() {
         switch (userAction) {
             // Infix to Polish Notation
             case '1': {
-
-                std::cout << "<< Expression\n>> ";
-                std::string expr;
-                std::getline(std::cin, expr);
-
                 try {
-                    if (isDebugMode) std::cout << "Translating to RPN...\n";
-                    std::vector<std::string> rpn = toRPN(expr, isDebugMode);
-                    if (isDebugMode) std::cout << "Translating to NPN...\n";
-                    std::vector<std::string> npn = toNPN(expr, isDebugMode);
-                    double rpnAnswer = evaluate(rpn, false);
-                    double npnAnswer = evaluate(npn, true);
+                    std::cout << "<< Expression\n>> ";
+                    std::string expr;
+                    std::getline(std::cin, expr);
 
-                    std::cout << std::setw(64) << std::setfill('-') << ' ' << std::setfill(' ') << "\n   RPN: ";
+                    std::vector<std::string> rpn = toRPN(expr, isDebugMode);               // Get Reverse PN
+                    std::vector<std::string> npn = toNPN(expr, isDebugMode);               // Get Normal PN
+                    double rpnAnswer = evaluate(rpn, false, isDebugMode);       // Evaluate RPN
+                    double npnAnswer = evaluate(npn, true, isDebugMode);        // Evaluate NPN
+
+                    std::cout << std::setw(64) << std::setfill('-') << ' ' << std::setfill(' ');
+                    std::cout << "\n Input: " << expr << "\n   RPN: ";
                     for (auto token : rpn) std::cout << token << ' ';
                     std::cout << "\n   NPN: ";
                     for (auto token : npn) std::cout << token << ' ';
                     std::cout << "\nAnswer: " << rpnAnswer;
                     std::cout << "\nIs RPN == NPN: " << (npnAnswer == rpnAnswer ? "True" : "False") << '\n';
                 }
-                catch (const char* error){
-                    std::cerr << error << '\n';
-                }
-
+                catch (std::invalid_argument& e) { std::cerr << "Invalid argument. " << e.what() << std::endl; }
+                catch (std::runtime_error& e) { std::cerr << "Runtime error. " << e.what() << std::endl; }
                 break;
             }
 
@@ -220,10 +226,8 @@ int main() {
                     double answer = evaluate(npn, isNPN, isDebugMode);
                     std::cout << "Answer: " << answer << std::endl;
                 }
-                catch (const char* error){
-                    std::cerr << error << '\n';
-                }
-
+                catch (std::invalid_argument& e) { std::cerr << "Invalid argument. " << e.what() << std::endl; }
+                catch (std::runtime_error& e) { std::cerr << "Runtime error. " << e.what() << std::endl; }
                 break;
             }
 
