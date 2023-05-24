@@ -1,15 +1,26 @@
 #ifndef INC_02_NODE_H
 #define INC_02_NODE_H
 
-
-class Node {
-private:
-    int value;
-    int height;
+struct Node {
+    int key;
+    unsigned char height;
     Node *left;
     Node *right;
+
+    Node(int k);
+};
+
+class Tree {
 public:
-    Node(int val) { value = val; left = right = nullptr; height = 1; }
+    Node *root = nullptr;
+
+    void insert(int k);
+private:
+    unsigned char height(Node *node);
+    void fixHeight(Node *node);
+    Node* rotateRight(Node *head);
+    Node* rotateLeft(Node *head);
+    Node* _insert(Node *head, int k);
 };
 
 #endif //INC_02_NODE_H

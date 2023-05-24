@@ -21,7 +21,23 @@ bool inputAction(char &userAction) {
     return true;
 }
 
+/// Reads the integer input via cin
+bool inputInt(int &variable, bool isUnsigned = false) {
+    std::cin >> variable;
+    if (std::cin.fail() || (isUnsigned && variable < 0) || std::cin.peek() != '\n') {
+        std::cout << "Invalid input\n";
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
+        return false;
+    }
+    return true;
+}
+
+
 int main() {
+
+    Tree tree;
+
     while (true) {
         char userAction;                            // Get command from user
         if (!inputAction(userAction)) continue;  // Error occurred
@@ -29,11 +45,14 @@ int main() {
 
         switch (userAction) {
             case '1':
-                std::cout << "Case 1\n";
+                std::cout << " << [TEST] Enter an element to insert:\n>> ";
+                int key;
+                if (!inputInt(key)) continue;
+                tree.insert(key);
+                std::cout << " [TEST] Element inserted. No output RN\n";
                 break;
             default: std::cout << "RuntimeError. Unknown command\n";
         }
-        system("pause");
     }
     return 0;
 }
