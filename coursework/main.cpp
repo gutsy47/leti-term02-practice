@@ -4,7 +4,7 @@
 
 bool inputAction(char &userAction) {
     std::cout << "<< Action:\n"
-                 "   1. Case 1\n"
+                 "   i. Insert new node\n "
               << std::setw(28) << std::setfill('-') << '\n'
               << std::setfill(' ') <<
                  "   0. Exit\n"
@@ -44,12 +44,18 @@ int main() {
         if (userAction == '0') break;               // Exit command
 
         switch (userAction) {
-            case '1':
-                std::cout << " << [TEST] Enter an element to insert:\n>> ";
+            // Insert new node
+            case 'i':
+                std::cout << " << Enter value of the new node\n>> ";
                 int key;
                 if (!inputInt(key)) continue;
                 tree.insert(key);
-                std::cout << " [TEST] Element inserted. No output RN\n";
+                tree.print();
+                break;
+            // Temporary print test case
+            case 't':
+                for (int i = -10; i < 5; ++i) tree.insert(i);
+                tree.print();
                 break;
             default: std::cout << "RuntimeError. Unknown command\n";
         }

@@ -15,6 +15,7 @@ public:
     Node *root = nullptr;
 
     void insert(int k);
+    void print();
 private:
     unsigned char height(Node *node);
     void fixHeight(Node *node);
