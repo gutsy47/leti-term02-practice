@@ -50,12 +50,12 @@ int main() {
                 int key;
                 if (!inputInt(key)) continue;
                 tree.insert(key);
-                tree.print();
+                tree.printHorizontal();
                 break;
             // Temporary print test case
             case 't':
                 for (int i = -10; i < 5; ++i) tree.insert(i);
-                tree.print();
+                tree.printHorizontal();
                 break;
             default: std::cout << "RuntimeError. Unknown command\n";
         }
