@@ -54,7 +54,10 @@ void fillTreeRandom(Tree &tree) {
     std::cout << "<< Enter size of the tree:\n>> ";
     int size;
     while (!inputInt(size, true, true) || size == 0);
+    auto start = std::chrono::steady_clock::now();
     for (int i = 0; i < size; ++i) tree.insert(-99 + std::rand() % 198);
+    std::cout << "Tree created. Elapsed time: ";
+    printTimeDurationCast(start);
 }
 
 void fillTreeManual(Tree &tree) {
@@ -76,6 +79,7 @@ void fillTreeManual(Tree &tree) {
         }
     }
     for (auto el : values) tree.insert(el);
+    std::cout << "Tree created.\n";
 }
 
 int main() {
@@ -96,15 +100,8 @@ int main() {
         }
         break;
     }
-    if (input == 1) {
-        auto start = std::chrono::steady_clock::now();
-        fillTreeRandom(tree);
-        std::cout << "Tree created. Elapsed time: ";
-        printTimeDurationCast(start);
-    } else {
-        fillTreeManual(tree);
-        std::cout << "Tree created.\n";
-    }
+    if (input == 1) fillTreeRandom(tree);
+    else fillTreeManual(tree);
     tree.print(isPrintVertical);
 
     while (true) {
