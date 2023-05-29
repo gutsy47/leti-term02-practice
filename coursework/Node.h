@@ -16,6 +16,7 @@ public:
 
     void insert(int k);
     void printHorizontal();
+    Node* search(int k);
     ~Tree();
 private:
     unsigned char height(Node *node);
@@ -23,6 +24,7 @@ private:
     Node* rotateRight(Node *head);
     Node* rotateLeft(Node *head);
     Node* _insert(Node *head, int k);
+    Node* _search(Node *head, int k);
     void deleteTree(Node *head);
 };
 

@@ -1,11 +1,16 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <chrono>
 #include "Node.h"
 
 bool inputAction(char &userAction) {
     std::cout << "<< Action:\n"
-                 "   i. Insert new node\n "
+                 "   i. Insert new node\n"
+                 "   f. Find the node by it`s value\n"
+                 "   d. Delete the node by it`s value\n"
+                 "   p. Print the tree\n"
+                 "   s. Switch the print method\n"
               << std::setw(28) << std::setfill('-') << '\n'
               << std::setfill(' ') <<
                  "   0. Exit\n"
@@ -33,6 +38,17 @@ bool inputInt(int &variable, bool isSpaceSep = false, bool isUnsigned = false) {
     }
     return true;
 }
+
+/// Gets the start time_point and prints the duration_cast(now-start) in scientific format
+void printTimeDurationCast(auto start, bool isEndOfLine = true) {
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    std::cout << std::scientific << std::setprecision(1);
+    std::cout << elapsed.count() / 1e9 << " s";
+    if (isEndOfLine) std::cout << std::endl;
+    std::cout << std::defaultfloat;
+}
+
 
 void fillTreeRandom(Tree &tree) {
     std::cout << "<< Enter size of the tree:\n>> ";
@@ -78,9 +94,15 @@ int main() {
         }
         break;
     }
-    if (input == 1) fillTreeRandom(tree);
-    else fillTreeManual(tree);
-    std::cout << "Created tree:\n";
+    if (input == 1) {
+        auto start = std::chrono::steady_clock::now();
+        fillTreeRandom(tree);
+        std::cout << "Tree created. Elapsed time: ";
+        printTimeDurationCast(start);
+    } else {
+        fillTreeManual(tree);
+        std::cout << "Tree created.\n";
+    }
     tree.printHorizontal();
 
     while (true) {
@@ -90,17 +112,62 @@ int main() {
 
         switch (userAction) {
             // Insert new node
-            case 'i':
+            case 'i': {
                 std::cout << "<< Enter value of the new node\n>> ";
                 int key;
                 if (!inputInt(key, true)) continue;
+
+                auto start = std::chrono::steady_clock::now();
                 tree.insert(key);
+                std::cout << "Value inserted. Elapsed time: ";
+                printTimeDurationCast(start);
                 tree.printHorizontal();
                 break;
+            }
+
+            // Get the node by it`s value
+            case 'f': {
+                std::cout << "<< Enter the value you are looking for\n>> ";
+                int key;
+                if (!inputInt(key, true)) continue;
+
+                auto start = std::chrono::steady_clock::now();
+                Node *node = tree.search(key);
+                if (node) std::cout << "Node found. Elapsed time: ";
+                else std::cout << "Node not found. Elapsed time: ";
+                printTimeDurationCast(start);
+                tree.printHorizontal();
+                break;
+            }
+
+            // Delete the node by it`s value
+            case 'd': {
+                std::cout << "<< Enter the node value to remove\n>> ";
+
+                auto start = std::chrono::steady_clock::now();
+                // Do smh
+                std::cout << "Node deleted. Elapsed time: ";
+                printTimeDurationCast(start);
+                tree.printHorizontal();
+                break;
+            }
+
+            // Print the tree
+            case 'p': {
+                tree.printHorizontal();
+                break;
+            }
+
+            // Switch the tree print method
+            case 's': {
+                std::cout << "<< The tree print method has been switched to ";
+                break;
+            }
 
             // Runtime error. Unknown command
             default: std::cout << "RuntimeError. Unknown command\n";
         }
+        system("pause");
     }
     return 0;
 }

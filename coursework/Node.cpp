@@ -78,6 +78,19 @@ Tree::~Tree() {
     deleteTree(root);
 }
 
+Node* Tree::_search(Node *head, int k) {
+    if (!head) return nullptr;
+
+    if (k == head->key) return head;
+
+    if (k > head -> key) return _search(head->right, k);
+    else return _search(head->left, k);
+}
+
+Node* Tree::search(int k) {
+    return _search(root, k);
+}
+
 /**
  * Fills the vector with tree node keys using post-order traversal
  * @param[in] head The root node of the tree
@@ -163,4 +176,5 @@ void Tree::printHorizontal() {
         }
         std::cout << std::endl;
     }
+    std::cout << std::endl;
 }
