@@ -15,8 +15,8 @@ public:
     Node *root = nullptr;
 
     void insert(int k);
-    void printHorizontal();
     Node* search(int k);
+    void print(bool isPrintVertical);
     ~Tree();
 private:
     unsigned char height(Node *node);

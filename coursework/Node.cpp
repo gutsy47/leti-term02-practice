@@ -109,7 +109,7 @@ void getVerticalOrder(Node* head, std::vector<std::vector<int>>& verticalOrder, 
 }
 
 /**
- * Prints the tree to the console
+ * Prints the tree horizontally to the console
  * @warning - Maximum tree height = 6
  * @warning - Numbers must be in the range [-99, 999]
  * @warning - Extra branches will be displayed if bFactor != 0
@@ -124,21 +124,21 @@ void getVerticalOrder(Node* head, std::vector<std::vector<int>>& verticalOrder, 
  * -10  -8  -6  -4  -2  0   2   4
  * \endverbatim
  */
-void Tree::printHorizontal() {
-    if (!root) return;  // Nothing to print
+void _printHorizontal(Node* head) {
+    if (!head) return;  // Nothing to print
 
     std::string downL = "Ú",
                 downR = "¿",
                 horiz = "Ä",
                 horUp = "Á";
 
-    unsigned char h = root->height;            // Max height
+    unsigned char h = head->height;            // Max height
     unsigned short maxLine = pow(2, h-1) * 4;  // Chars needed to display the last row
     unsigned short tab, prefix = 10;           // Prefix will be recounted. First raw tab isn't needed
 
     std::vector<std::vector<int>> verticalOrder;
     verticalOrder.resize(h + 1);
-    getVerticalOrder(root, verticalOrder);
+    getVerticalOrder(head, verticalOrder);
 
     for (short i = 1; i <= h; ++i) {
         auto row = verticalOrder[i-1];
@@ -176,5 +176,45 @@ void Tree::printHorizontal() {
         }
         std::cout << std::endl;
     }
+}
+
+/**
+ * Prints the tree vertically to the console
+ * @example
+ * \verbatim
+ *        ÚÄÄ>97
+ *    ÚÄÄ>93
+ *    ³   ÀÄÄ>67
+ * ÄÄÄ>62
+ *    ³       ÚÄÄ>11
+ *    ³   ÚÄÄ>-17
+ *    ³   ³   ÀÄÄ>-45
+ *    ÀÄÄ>-46
+ *        ÀÄÄ>-58
+ *            ÀÄÄ>-65
+ * \endverbatim
+ */
+void _printVertical(Node* head, int rootValue, std::string prefix = "", bool isLeft = false) {
+    if (!head) return;
+
+    std::string rPrefix = prefix + (isLeft ? "³   " : "    ");
+    _printVertical(head->right, rootValue, rPrefix, false);
+
+    if (head->key == rootValue) std::cout << "ÄÄÄ>" << head->key << std::endl;
+    else std::cout << prefix << (isLeft ? "ÀÄÄ>" : "ÚÄÄ>") << head->key << std::endl;
+
+    if (prefix.empty()) prefix += "    ";
+    else prefix += (isLeft ? "    " : "³   ");
+    _printVertical(head->left, rootValue, prefix, true);
+}
+
+/**
+ * Prints the tree to the console
+ * @param[in] isPrintVertical print vertically if true else print horizontally
+ */
+void Tree::print(bool isPrintVertical = false) {
+    std::cout << std::endl;
+    if (isPrintVertical) _printVertical(root, root->key);
+    else _printHorizontal(root);
     std::cout << std::endl;
 }

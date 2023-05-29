@@ -80,6 +80,8 @@ void fillTreeManual(Tree &tree) {
 
 int main() {
 
+    bool isPrintVertical = true;
+
     // Create the tree
     Tree tree;
     int input;
@@ -103,7 +105,7 @@ int main() {
         fillTreeManual(tree);
         std::cout << "Tree created.\n";
     }
-    tree.printHorizontal();
+    tree.print(isPrintVertical);
 
     while (true) {
         char userAction;                            // Get command from user
@@ -121,7 +123,7 @@ int main() {
                 tree.insert(key);
                 std::cout << "Value inserted. Elapsed time: ";
                 printTimeDurationCast(start);
-                tree.printHorizontal();
+                tree.print(isPrintVertical);
                 break;
             }
 
@@ -136,7 +138,7 @@ int main() {
                 if (node) std::cout << "Node found. Elapsed time: ";
                 else std::cout << "Node not found. Elapsed time: ";
                 printTimeDurationCast(start);
-                tree.printHorizontal();
+                tree.print(isPrintVertical);
                 break;
             }
 
@@ -148,19 +150,22 @@ int main() {
                 // Do smh
                 std::cout << "Node deleted. Elapsed time: ";
                 printTimeDurationCast(start);
-                tree.printHorizontal();
+                tree.print(isPrintVertical);
                 break;
             }
 
             // Print the tree
             case 'p': {
-                tree.printHorizontal();
+                tree.print(isPrintVertical);
                 break;
             }
 
             // Switch the tree print method
             case 's': {
-                std::cout << "<< The tree print method has been switched to ";
+                isPrintVertical = not isPrintVertical;
+                std::cout << "The tree print method has been switched to ";
+                if (isPrintVertical) std::cout << "vertical\n";
+                else std::cout << "horizontal\n";
                 break;
             }
 
