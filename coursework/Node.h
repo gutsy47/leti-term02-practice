@@ -12,11 +12,12 @@ struct Node {
 
 class Tree {
 public:
-    Node *root = nullptr;
+    Node *root;
 
     void insert(int k);
     Node* search(int k);
     void print(bool isPrintVertical);
+    Tree() : root(nullptr) {}
     ~Tree();
 private:
     unsigned char height(Node *node);

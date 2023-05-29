@@ -41,8 +41,7 @@ Node* Tree::rotateLeft(Node *head) {
 
 Node* Tree::_insert(Node *head, int k) {
     if (!head) {
-        Node * tmp = new Node(k);
-        return tmp;
+        return new Node(k);
     }
 
     if (k < head->key) head->left = _insert(head->left, k);
@@ -79,9 +78,7 @@ Tree::~Tree() {
 }
 
 Node* Tree::_search(Node *head, int k) {
-    if (!head) return nullptr;
-
-    if (k == head->key) return head;
+    if (!head || k == head->key) return head;
 
     if (k > head -> key) return _search(head->right, k);
     else return _search(head->left, k);

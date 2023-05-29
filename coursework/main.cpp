@@ -53,7 +53,7 @@ void printTimeDurationCast(auto start, bool isEndOfLine = true) {
 void fillTreeRandom(Tree &tree) {
     std::cout << "<< Enter size of the tree:\n>> ";
     int size;
-    while (!inputInt(size, true, true) || size == 0);
+    while (!inputInt(size, true, true) || size == 0) std::cout << ">> ";
     auto start = std::chrono::steady_clock::now();
     for (int i = 0; i < size; ++i) tree.insert(-99 + std::rand() % 198);
     std::cout << "Tree created. Elapsed time: ";
