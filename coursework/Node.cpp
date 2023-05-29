@@ -65,6 +65,19 @@ void Tree::insert(int k) {
     root = _insert(root, k);
 }
 
+void Tree::deleteTree(Node *head) {
+    if (!head) return;
+
+    deleteTree(head->left);
+    deleteTree(head->right);
+
+    delete head;
+}
+
+Tree::~Tree() {
+    deleteTree(root);
+}
+
 /**
  * Fills the vector with tree node keys using post-order traversal
  * @param[in] head The root node of the tree

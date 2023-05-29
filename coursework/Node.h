@@ -16,12 +16,14 @@ public:
 
     void insert(int k);
     void printHorizontal();
+    ~Tree();
 private:
     unsigned char height(Node *node);
     void fixHeight(Node *node);
     Node* rotateRight(Node *head);
     Node* rotateLeft(Node *head);
     Node* _insert(Node *head, int k);
+    void deleteTree(Node *head);
 };
 
 #endif //INC_02_NODE_H
