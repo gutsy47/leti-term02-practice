@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <vector>
 #include <chrono>
+#include <string>
 #include "Node.h"
 
 bool inputAction(char &userAction) {
@@ -40,13 +41,13 @@ bool inputInt(int &variable, bool isSpaceSep = false, bool isUnsigned = false) {
 }
 
 /// Gets the start time_point and prints the duration_cast(now-start) in scientific format
-void printTimeDurationCast(auto start, bool isEndOfLine = true) {
+void printTimeDurationCast(auto start, std::ostream &outStream = std::cout, bool isEndOfLine = true) {
     auto end = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    std::cout << std::scientific << std::setprecision(1);
-    std::cout << elapsed.count() / 1e9 << " s";
-    if (isEndOfLine) std::cout << std::endl;
-    std::cout << std::defaultfloat;
+    outStream << std::scientific << std::setprecision(1);
+    outStream << elapsed.count() / 1e9 << " s";
+    if (isEndOfLine) outStream << std::endl;
+    outStream << std::defaultfloat;
 }
 
 
@@ -82,26 +83,179 @@ void fillTreeManual(Tree &tree) {
     std::cout << "Tree created.\n";
 }
 
+void generateAnswers() {
+    // Environment variables
+    const char* INPUT_PATH = std::getenv("INPUT_PATH");
+    const char* OUTPUT_KEY_PATH = std::getenv("OUTPUT_KEY_PATH");
+    const char* OUTPUT_ANS_PATH = std::getenv("OUTPUT_ANS_PATH");
+
+    std::ifstream in(INPUT_PATH);            // Open input file
+    std::ofstream out_key(OUTPUT_KEY_PATH);  // Open output key file
+    std::ofstream out_ans(OUTPUT_ANS_PATH);  // Open output ans file
+
+    // File not open handler
+    if (!in.is_open()) {
+        std::string errorMessage = "FileNotFoundError. No such file: `" + std::string(INPUT_PATH) + "`";
+        throw errorMessage;
+    }
+    if (!out_key.is_open()) {
+        std::string errorMessage = "FileNotFoundError. No such file: `" + std::string(OUTPUT_KEY_PATH) + "`";
+        throw errorMessage;
+    }
+    if (!out_ans.is_open()) {
+        std::string errorMessage = "FileNotFoundError. No such file: `" + std::string(OUTPUT_ANS_PATH) + "`";
+        throw errorMessage;
+    }
+
+
+    // Work
+    std::string line;             // Current line in file
+    unsigned int lineNumber = 0;  // Current line index
+    Tree tree;                    // Tree object
+    while (std::getline(in, line)) {
+        lineNumber += 1;
+
+        // Line is empty: end of tree commands. Continue
+        if (line.empty()) {
+            tree.print(true, out_key);
+            out_ans << '\n' << std::setw(64) << std::setfill('~') << '\n' << std::setfill(' ') << '\n';
+            out_key << std::setw(64) << std::setfill('~') << '\n' << std::setfill(' ');
+            tree.clear();
+            continue;
+        }
+
+        // Split string
+        std::vector<std::string> tokens;
+        auto *number = new std::string;
+        auto *symbolCount = new unsigned int(0);
+        for (char c: line) {
+            *symbolCount += 1;
+            std::string s(1, c);
+            if (c == ' ') {
+                if (!number->empty()) {
+                    tokens.push_back(*number);
+                    number->clear();
+                }
+            } else if (*symbolCount == 1 && (c == 'i' || c == 'f' || c == 'd')) {
+                if (!number->empty()) {
+                    tokens.push_back(*number);
+                    number->clear();
+                }
+                tokens.push_back(s);
+            } else if (isdigit(c)) {
+                *number += c;
+            } else {
+                in.close();
+                out_key.close();
+                out_ans.close();
+                std::string errorMessage = "Invalid syntax. Unknown symbol `" + s + "`. [Line " +
+                                           std::to_string(lineNumber) + ", symbol " + std::to_string(*symbolCount) +
+                                           "]";
+                number->erase();
+                delete symbolCount;
+                throw errorMessage;
+            }
+        }
+        if (!number->empty()) tokens.push_back(*number);
+        number->erase();
+        delete symbolCount;
+
+        // Create the tree
+        if (!tree.root) {
+            // Another command or syntax error handler
+            if (line[0] != '-' && !isdigit(line[0])) {
+                in.close();
+                out_key.close();
+                out_ans.close();
+                std::string errorMessage = "RuntimeError. An array of tree values was expected, but something "
+                                           "else came in. [Line " + std::to_string(lineNumber) + ", symbol 1]";
+                throw errorMessage;
+            }
+            auto start = std::chrono::steady_clock::now();
+            for (auto &token: tokens) tree.insert(std::stoi(token));
+            out_ans << "Create tree: " << line << "; Time elapsed: ";
+            printTimeDurationCast(start, out_ans);
+            tree.print(true, out_ans);
+            continue;
+        }
+
+        // Action
+        auto start = std::chrono::steady_clock::now();
+        switch (line[0]) {
+            // Insert new node
+            case 'i':
+                out_ans << "Insert values:";
+                for (int i = 1; i < tokens.size(); ++i) {
+                    tree.insert(std::stoi(tokens[i]));
+                    out_ans << " " << tokens[i];
+                }
+                break;
+            // Search the node
+            case 'f':
+                out_ans << "Search values:";
+                for (int i = 1; i < tokens.size(); ++i) {
+                    Node *node = tree.search(std::stoi(tokens[i]));
+                    out_ans << " " << tokens[i] << (node ? "+" : "-");
+                }
+                break;
+            // Delete the node
+            case 'd':
+                out_ans << "Delete values:";
+                for (int i = 1; i < tokens.size(); ++i) {
+                    tree.deleteNode(std::stoi(tokens[i]));
+                    out_ans << " " << tokens[i];
+                }
+                break;
+            // Unknown symbol
+            default:
+                in.close();
+                out_key.close();
+                out_ans.close();
+                throw "RuntimeError.";
+        }
+        out_ans << "; Time elapsed: ";
+        printTimeDurationCast(start, out_ans);
+        tree.print(true, out_ans);
+    }
+
+    in.close();
+    out_key.close();
+    out_ans.close();
+}
+
 int main() {
 
     bool isPrintVertical = false;
 
-    // Create the tree
-    Tree tree;
+    // Create tree or generate answers
     int input;
     while (true) {
-        std::cout << "<< Choose how to create the tree:\n"
-                     "   1. Enter size and autofill with random numbers from -99 to 99\n"
-                     "   2. Enter values until you get bored\n>> ";
+        std::cout << "<< Choose how to work with the AVL-tree:\n"
+                     "   1. New with size init: Fill with randint from -99 to 99\n"
+                     "   2. New with value init: Fill manually until the input is 0\n"
+                     "   3. Generating based on `input.txt` tests\n"
+                     ">> ";
         if (!inputInt(input, true)) continue;
-        if (input != 2 && input != 1) {
-            std::cout << "Your input must be just 1 or 2. Isn't it simple?\n";
+        if (input != 3 && input != 2 && input != 1) {
+            std::cout << "Your input must be just 1, 2 or 3. Isn't it simple?\n";
             continue;
         }
         break;
     }
-    if (input == 1) fillTreeRandom(tree);
-    else fillTreeManual(tree);
+    if (input == 3) {                       // Answer generation, working with .txt
+        try {
+            generateAnswers();
+        }
+        catch (std::string error) {
+            std::cerr << error << std::endl;
+            return -1;
+        }
+        std::cout << "Answers generated. Check the files";
+        return 0;
+    }
+    Tree tree;
+    if (input == 1) fillTreeRandom(tree);   // Random fill, working in terminal
+    else fillTreeManual(tree);              // Manual fill, working in terminal
     tree.print(isPrintVertical);
 
     while (true) {

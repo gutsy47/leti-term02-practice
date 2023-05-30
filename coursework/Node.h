@@ -1,6 +1,9 @@
 #ifndef INC_02_NODE_H
 #define INC_02_NODE_H
 
+#include <iostream>
+#include <fstream>
+
 struct Node {
     int key;
     unsigned char height;
@@ -17,9 +20,9 @@ public:
     void insert(int k);
     Node* search(int k);
     void deleteNode(int k);
-    void print(bool isPrintVertical);
+    void print(bool isPrintVertical = false, std::ostream &outStream = std::cout);
+    void clear();
     Tree() : root(nullptr) {}
-    ~Tree();
 private:
     unsigned char height(Node *node);
     void fixHeight(Node *node);

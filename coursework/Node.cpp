@@ -150,8 +150,9 @@ void Tree::deleteTree(Node *head) {
     delete head;
 }
 
-Tree::~Tree() {
+void Tree::clear() {
     deleteTree(root);
+    root = nullptr;
 }
 
 /**
@@ -257,27 +258,27 @@ void _printHorizontal(Node* head) {
  *            ÀÄÄ>-65
  * \endverbatim
  */
-void _printVertical(Node* head, int rootValue, std::string prefix = "", bool isLeft = false) {
+void _printVertical(Node* head, int rootValue, std::ostream &outStream = std::cout, std::string prefix = "", bool isLeft = false) {
     if (!head) return;
 
     std::string rPrefix = prefix + (isLeft ? "³   " : "    ");
-    _printVertical(head->right, rootValue, rPrefix, false);
+    _printVertical(head->right, rootValue, outStream, rPrefix, false);
 
-    if (head->key == rootValue) std::cout << "ÄÄÄ>" << head->key << std::endl;
-    else std::cout << prefix << (isLeft ? "ÀÄÄ>" : "ÚÄÄ>") << head->key << std::endl;
+    if (head->key == rootValue) outStream << "ÄÄÄ>" << head->key << std::endl;
+    else outStream << prefix << (isLeft ? "ÀÄÄ>" : "ÚÄÄ>") << head->key << std::endl;
 
     if (prefix.empty()) prefix += "    ";
     else prefix += (isLeft ? "    " : "³   ");
-    _printVertical(head->left, rootValue, prefix, true);
+    _printVertical(head->left, rootValue, outStream, prefix, true);
 }
 
 /**
  * Prints the tree to the console
  * @param[in] isPrintVertical print vertically if true else print horizontally
  */
-void Tree::print(bool isPrintVertical = false) {
-    std::cout << std::endl;
-    if (isPrintVertical) _printVertical(root, root->key);
+void Tree::print(bool isPrintVertical, std::ostream &outStream) {
+    outStream << std::endl;
+    if (isPrintVertical) _printVertical(root, root->key, outStream);
     else _printHorizontal(root);
-    std::cout << std::endl;
+    outStream << std::endl;
 }
