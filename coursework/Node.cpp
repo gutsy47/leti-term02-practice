@@ -39,6 +39,11 @@ Node* Tree::rotateLeft(Node *head) {
     return newHead;
 }
 
+int Tree::getBalanceFactor(Node *head) {
+    if (!head) return 0;
+    return height(head->left) - height(head->right);
+}
+
 Node* Tree::_insert(Node *head, int k) {
     if (!head) {
         return new Node(k);
@@ -48,7 +53,7 @@ Node* Tree::_insert(Node *head, int k) {
     else if (k > head->key) head->right = _insert(head->right, k);
 
     fixHeight(head);
-    int balanceFactor = height(head->left) - height(head->right);
+    int balanceFactor = getBalanceFactor(head);
     if (balanceFactor > 1) {
         if (k >= head->left->key) head->left = rotateLeft(head->left);
         return rotateRight(head);
@@ -64,6 +69,78 @@ void Tree::insert(int k) {
     root = _insert(root, k);
 }
 
+Node* Tree::_search(Node *head, int k) {
+    if (!head || k == head->key) return head;
+
+    if (k > head -> key) return _search(head->right, k);
+    else return _search(head->left, k);
+}
+
+Node* Tree::search(int k) {
+    return _search(root, k);
+}
+
+Node* findMin(Node* head) {
+    if (!head) return nullptr;
+    while (head->left) {
+        head = head->left;
+    }
+    return head;
+}
+
+Node* Tree::_deleteNode(Node *head, int k) {
+    if (!head) return nullptr;
+
+    if (k < head->key) head->left = _deleteNode(head->left, k);
+    else if (k > head->key) head->right = _deleteNode(head->right, k);
+    else {
+        if (!head->left || !head->right) {
+            // Node with one or no children
+            Node* temp = head->left ? head->left : head->right;  // If true then right doesn't exist, else check right
+            if (!temp) {        // No children
+                temp = head;
+                head = nullptr;
+            } else {            // One child
+                *head = *temp;
+            }
+            delete temp;
+        } else {
+            // Node with two children
+            Node* temp = findMin(head->right);
+            head->key = temp->key;
+            head->right = _deleteNode(head->right, temp->key);
+        }
+    }
+
+    if (!head) return nullptr;
+
+    // Update the height
+    head->height = 1 + std::max(height(head->left), height(head->right));
+
+    // Check for balance violation and perform rotations
+    int balance = getBalanceFactor(head);
+    if (balance > 1 && getBalanceFactor(head->left) >= 0) {
+        return rotateRight(head);
+    }
+    if (balance > 1 && getBalanceFactor(head->left) < 0) {
+        head->left = rotateLeft(head->left);
+        return rotateRight(head);
+    }
+    if (balance < -1 && getBalanceFactor(head->right) <= 0) {
+        return rotateLeft(head);
+    }
+    if (balance < -1 && getBalanceFactor(head->right) > 0) {
+        head->right = rotateRight(head->right);
+        return rotateLeft(head);
+    }
+
+    return head;
+}
+
+void Tree::deleteNode(int k) {
+    root = _deleteNode(root, k);
+}
+
 void Tree::deleteTree(Node *head) {
     if (!head) return;
 
@@ -75,17 +152,6 @@ void Tree::deleteTree(Node *head) {
 
 Tree::~Tree() {
     deleteTree(root);
-}
-
-Node* Tree::_search(Node *head, int k) {
-    if (!head || k == head->key) return head;
-
-    if (k > head -> key) return _search(head->right, k);
-    else return _search(head->left, k);
-}
-
-Node* Tree::search(int k) {
-    return _search(root, k);
 }
 
 /**

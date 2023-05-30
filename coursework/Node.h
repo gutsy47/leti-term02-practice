@@ -16,6 +16,7 @@ public:
 
     void insert(int k);
     Node* search(int k);
+    void deleteNode(int k);
     void print(bool isPrintVertical);
     Tree() : root(nullptr) {}
     ~Tree();
@@ -24,8 +25,10 @@ private:
     void fixHeight(Node *node);
     Node* rotateRight(Node *head);
     Node* rotateLeft(Node *head);
+    int getBalanceFactor(Node *head);
     Node* _insert(Node *head, int k);
     Node* _search(Node *head, int k);
+    Node* _deleteNode(Node *head, int k);
     void deleteTree(Node *head);
 };
 

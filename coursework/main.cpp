@@ -84,7 +84,7 @@ void fillTreeManual(Tree &tree) {
 
 int main() {
 
-    bool isPrintVertical = true;
+    bool isPrintVertical = false;
 
     // Create the tree
     Tree tree;
@@ -142,9 +142,11 @@ int main() {
             // Delete the node by it`s value
             case 'd': {
                 std::cout << "<< Enter the node value to remove\n>> ";
+                int key;
+                if (!inputInt(key, true)) continue;
 
                 auto start = std::chrono::steady_clock::now();
-                // Do smh
+                tree.deleteNode(key);
                 std::cout << "Node deleted. Elapsed time: ";
                 printTimeDurationCast(start);
                 tree.print(isPrintVertical);
