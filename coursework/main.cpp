@@ -3,8 +3,13 @@
 #include <vector>
 #include <chrono>
 #include <string>
-#include "Node.h"
+#include "Tree.h"
 
+/**
+ * Reads the user action input via cin
+ * @param[out] userAction Reference to a declared variable
+ * @return True if input was correct, else false
+ */
 bool inputAction(char &userAction) {
     std::cout << "<< Action:\n"
                  "   i. Insert new node\n"
@@ -28,7 +33,13 @@ bool inputAction(char &userAction) {
     return true;
 }
 
-/// Reads the integer input via cin
+/**
+ * Reads the integer input via cin
+ * @param[out] variable Reference to a declared variable
+ * @param[in] isSpaceSep If true, it does not check the last character of the input for newline
+ * @param[in] isUnsigned If true, then negative numbers will lead to an error
+ * @return True if input was correct, else false
+ */
 bool inputInt(int &variable, bool isSpaceSep = false, bool isUnsigned = false) {
     std::cin >> variable;
     if (std::cin.fail() || (isUnsigned && variable < 0) || (isSpaceSep && std::cin.peek() != '\n')) {
@@ -40,7 +51,12 @@ bool inputInt(int &variable, bool isSpaceSep = false, bool isUnsigned = false) {
     return true;
 }
 
-/// Gets the start time_point and prints the duration_cast(now-start) in scientific format
+/**
+ * Gets the start time and calculates the time elapsed
+ * @param[in] start Start time_point
+ * @param[in] outStream Output stream
+ * @param[in] isEndOfLine If true, puts a newline character at the end of line
+ */
 void printTimeDurationCast(auto start, std::ostream &outStream = std::cout, bool isEndOfLine = true) {
     auto end = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
@@ -50,7 +66,10 @@ void printTimeDurationCast(auto start, std::ostream &outStream = std::cout, bool
     outStream << std::defaultfloat;
 }
 
-
+/**
+ * Fill the tree of a given size with random numbers from -99 to 99
+ * @param[out] tree Reference to the tree object
+ */
 void fillTreeRandom(Tree &tree) {
     std::cout << "<< Enter size of the tree:\n>> ";
     int size;
@@ -61,6 +80,10 @@ void fillTreeRandom(Tree &tree) {
     printTimeDurationCast(start);
 }
 
+/**
+ * Fill the tree with numbers entered by the user
+ * @param[out] tree Reference to the tree object
+ */
 void fillTreeManual(Tree &tree) {
     std::cout << "<< Enter the tree nodes separated by spaces (Enter 0 to stop):\n";
     int value;
@@ -83,6 +106,10 @@ void fillTreeManual(Tree &tree) {
     std::cout << "Tree created.\n";
 }
 
+/**
+ * Take instructions from the INPUT_PATH file, execute them, and write the results to OUTPUT_KEY_PATH and OUTPUT_ANS_PATH
+ * @warning Be sure to specify environment variables before using
+ */
 void generateAnswers() {
     // Environment variables
     const char* INPUT_PATH = std::getenv("INPUT_PATH");

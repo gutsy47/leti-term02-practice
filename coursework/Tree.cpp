@@ -1,4 +1,4 @@
-#include "Node.h"
+#include "Tree.h"
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -39,11 +39,19 @@ Node* Tree::rotateLeft(Node *head) {
     return newHead;
 }
 
+/**
+ * Calculates the balance factor (leftHeight - rightHeight)
+ * @param[in] head Pointer to the root of the tree
+ * @return Balance factor
+ */
 int Tree::getBalanceFactor(Node *head) {
     if (!head) return 0;
     return height(head->left) - height(head->right);
 }
 
+/**
+ * Tree::insert Util
+ */
 Node* Tree::_insert(Node *head, int k) {
     if (!head) {
         return new Node(k);
@@ -65,10 +73,17 @@ Node* Tree::_insert(Node *head, int k) {
     return head;
 }
 
+/**
+ * Inserts new Node to the tree
+ * @param[in] k Value of the new Node
+ */
 void Tree::insert(int k) {
     root = _insert(root, k);
 }
 
+/**
+ * Tree::search Util
+ */
 Node* Tree::_search(Node *head, int k) {
     if (!head || k == head->key) return head;
 
@@ -76,10 +91,19 @@ Node* Tree::_search(Node *head, int k) {
     else return _search(head->left, k);
 }
 
+/** Find the element by it`s value in tree
+ * @param[in] k Value of the searchable element
+ * @return Found Node or nullptr if not found
+ */
 Node* Tree::search(int k) {
     return _search(root, k);
 }
 
+/**
+ * Find the minimum element of the tree
+ * @param[in] head Pointer to the root of the tree
+ * @return New root
+ */
 Node* findMin(Node* head) {
     if (!head) return nullptr;
     while (head->left) {
@@ -88,6 +112,12 @@ Node* findMin(Node* head) {
     return head;
 }
 
+/**
+ * Deletes the tree`s node
+ * @param[in] head Pointer to the root of the tree
+ * @param[in] k Value of the deletable node
+ * @return New root
+ */
 Node* Tree::_deleteNode(Node *head, int k) {
     if (!head) return nullptr;
 
@@ -137,10 +167,18 @@ Node* Tree::_deleteNode(Node *head, int k) {
     return head;
 }
 
+/**
+ * Deletes the tree`s node and updates the Tree.root if necessary
+ * @param[in] k Value of the deletable node
+ */
 void Tree::deleteNode(int k) {
     root = _deleteNode(root, k);
 }
 
+/**
+ * Recursively deletes the tree
+ * @param[in] head Pointer to the root of the tree
+ */
 void Tree::deleteTree(Node *head) {
     if (!head) return;
 
@@ -150,6 +188,9 @@ void Tree::deleteTree(Node *head) {
     delete head;
 }
 
+/**
+ * Delete all the nodes of the tree
+ */
 void Tree::clear() {
     deleteTree(root);
     root = nullptr;

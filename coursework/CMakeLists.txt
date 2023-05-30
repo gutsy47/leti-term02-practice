@@ -3,4 +3,4 @@ project(coursework)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(coursework main.cpp Node.cpp)
+add_executable(coursework main.cpp Tree.cpp)

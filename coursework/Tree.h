@@ -1,9 +1,13 @@
-#ifndef INC_02_NODE_H
-#define INC_02_NODE_H
+#ifndef INC_02_TREE_H
+#define INC_02_TREE_H
 
 #include <iostream>
 #include <fstream>
 
+/**
+ * @struct Node
+ * AVL-Tree node
+ */
 struct Node {
     int key;
     unsigned char height;
@@ -13,6 +17,13 @@ struct Node {
     Node(int k);
 };
 
+/**
+ * @class Tree
+ * @brief Implementation of AVL-Tree
+ * Implement an AVL-Tree with the following functionality:
+ * insert, search, delete node/tree, output to ostream
+ * @example main.cpp
+ */
 class Tree {
 public:
     Node *root;
@@ -35,4 +46,4 @@ private:
     void deleteTree(Node *head);
 };
 
-#endif //INC_02_NODE_H
+#endif //INC_02_TREE_H
